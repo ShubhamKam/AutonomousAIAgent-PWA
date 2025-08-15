@@ -20,6 +20,7 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+        cache-dependency-path: 'AutonomousAIAgent/package-lock.json'
 
     - name: Setup Java JDK
       uses: actions/setup-java@v4
@@ -31,6 +32,7 @@ jobs:
       uses: android-actions/setup-android@v3
 
     - name: Install dependencies
+      working-directory: AutonomousAIAgent
       run: npm ci
 
     - name: Cache Gradle dependencies
@@ -39,15 +41,17 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
-          android/.gradle
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          AutonomousAIAgent/android/.gradle
+        key: ${{ runner.os }}-gradle-${{ hashFiles('AutonomousAIAgent/**/*.gradle*', 'AutonomousAIAgent/**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
 
     - name: Make Gradlew executable
+      working-directory: AutonomousAIAgent
       run: chmod +x android/gradlew
 
     - name: Generate keystore for signing
+      working-directory: AutonomousAIAgent
       run: |
         cd android/app
         keytool -genkeypair -v -storetype PKCS12 -keystore app-release-key.keystore \
@@ -56,6 +60,7 @@ jobs:
           -dname "CN=Autonomous AI Agent, OU=Development, O=ShubhamKam, L=Unknown, ST=Unknown, C=US"
 
     - name: Create signing config
+      working-directory: AutonomousAIAgent
       run: |
         cat >> android/gradle.properties << EOF
         MYAPP_RELEASE_STORE_FILE=app-release-key.keystore
@@ -65,6 +70,7 @@ jobs:
         EOF
 
     - name: Update build.gradle for signing
+      working-directory: AutonomousAIAgent
       run: |
         cat >> android/app/build.gradle << 'EOF'
         
@@ -88,11 +94,13 @@ jobs:
         EOF
 
     - name: Build Debug APK
+      working-directory: AutonomousAIAgent
       run: |
         cd android
         ./gradlew assembleDebug --no-daemon --stacktrace
 
     - name: Build Release APK
+      working-directory: AutonomousAIAgent
       run: |
         cd android
         ./gradlew assembleRelease --no-daemon --stacktrace
@@ -101,14 +109,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
-        path: android/app/build/outputs/apk/debug/app-debug.apk
+        path: AutonomousAIAgent/android/app/build/outputs/apk/debug/app-debug.apk
         retention-days: 30
 
     - name: Upload Release APK
       uses: actions/upload-artifact@v4
       with:
         name: app-release
-        path: android/app/build/outputs/apk/release/app-release.apk
+        path: AutonomousAIAgent/android/app/build/outputs/apk/release/app-release.apk
         retention-days: 30
 
     - name: Get current date
@@ -170,7 +178,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: android/app/build/outputs/apk/release/app-release.apk
+        asset_path: AutonomousAIAgent/android/app/build/outputs/apk/release/app-release.apk
         asset_name: AutonomousAIAgent-v1.0.${{ github.run_number }}-release.apk
         asset_content_type: application/vnd.android.package-archive
 
@@ -180,7 +188,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: android/app/build/outputs/apk/debug/app-debug.apk
+        asset_path: AutonomousAIAgent/android/app/build/outputs/apk/debug/app-debug.apk
         asset_name: AutonomousAIAgent-v1.0.${{ github.run_number }}-debug.apk
         asset_content_type: application/vnd.android.package-archive
 
@@ -227,20 +235,26 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+        cache-dependency-path: 'AutonomousAIAgent/package-lock.json'
 
     - name: Install dependencies
+      working-directory: AutonomousAIAgent
       run: npm ci
 
     - name: Run TypeScript compilation check
+      working-directory: AutonomousAIAgent
       run: npx tsc --noEmit
 
     - name: Run ESLint
+      working-directory: AutonomousAIAgent
       run: npx eslint . --ext .ts,.tsx,.js,.jsx
 
     - name: Run tests (if any)
+      working-directory: AutonomousAIAgent
       run: npm test -- --passWithNoTests
 
     - name: Check bundle size
+      working-directory: AutonomousAIAgent
       run: |
         echo "Checking React Native bundle size..."
         npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle
