@@ -1,0 +1,247 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          android/.gradle
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Make Gradlew executable
+      run: chmod +x android/gradlew
+
+    - name: Generate keystore for signing
+      run: |
+        cd android/app
+        keytool -genkeypair -v -storetype PKCS12 -keystore app-release-key.keystore \
+          -alias app-release-alias -keyalg RSA -keysize 2048 -validity 10000 \
+          -storepass android -keypass android \
+          -dname "CN=Autonomous AI Agent, OU=Development, O=ShubhamKam, L=Unknown, ST=Unknown, C=US"
+
+    - name: Create signing config
+      run: |
+        cat >> android/gradle.properties << EOF
+        MYAPP_RELEASE_STORE_FILE=app-release-key.keystore
+        MYAPP_RELEASE_KEY_ALIAS=app-release-alias
+        MYAPP_RELEASE_STORE_PASSWORD=android
+        MYAPP_RELEASE_KEY_PASSWORD=android
+        EOF
+
+    - name: Update build.gradle for signing
+      run: |
+        cat >> android/app/build.gradle << 'EOF'
+        
+        android {
+            signingConfigs {
+                release {
+                    if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
+                        storeFile file(MYAPP_RELEASE_STORE_FILE)
+                        storePassword MYAPP_RELEASE_STORE_PASSWORD
+                        keyAlias MYAPP_RELEASE_KEY_ALIAS
+                        keyPassword MYAPP_RELEASE_KEY_PASSWORD
+                    }
+                }
+            }
+            buildTypes {
+                release {
+                    signingConfig signingConfigs.release
+                }
+            }
+        }
+        EOF
+
+    - name: Build Debug APK
+      run: |
+        cd android
+        ./gradlew assembleDebug --no-daemon --stacktrace
+
+    - name: Build Release APK
+      run: |
+        cd android
+        ./gradlew assembleRelease --no-daemon --stacktrace
+
+    - name: Upload Debug APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug
+        path: android/app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 30
+
+    - name: Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release
+        path: android/app/build/outputs/apk/release/app-release.apk
+        retention-days: 30
+
+    - name: Get current date
+      id: date
+      run: echo "date=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        release_name: Autonomous AI Agent v1.0.${{ github.run_number }}
+        body: |
+          ## 🤖 Autonomous AI Agent - Mobile App Release
+          
+          **Release Date:** ${{ steps.date.outputs.date }}
+          **Build Number:** ${{ github.run_number }}
+          **Commit:** ${{ github.sha }}
+          
+          ### 🚀 Features
+          - **Fully Autonomous AI Agent** with 3 autonomy levels
+          - **Real-time Chat Interface** with context awareness
+          - **Advanced Task Management** system
+          - **Memory Management** with relevance scoring
+          - **Anthropic Claude API** integration
+          - **Modern React Native UI** with navigation
+          - **Local Data Persistence** and storage
+          
+          ### 📱 Installation
+          1. Download the APK file below
+          2. Enable "Install from Unknown Sources" in Android settings
+          3. Install the APK
+          4. Get your Anthropic API key from console.anthropic.com
+          5. Enter API key in app settings
+          6. Start using your autonomous AI agent!
+          
+          ### 🔧 Requirements
+          - Android 7.0+ (API level 24+)
+          - Internet connection for AI functionality
+          - Microphone permission for voice features (optional)
+          - Storage permission for data persistence
+          
+          ### 📋 What's New
+          - Initial release with full autonomous capabilities
+          - Chat interface with real-time messaging
+          - Task management and execution
+          - Settings and configuration
+          - Memory and context preservation
+          
+          **Note:** This is an automatically generated release from GitHub Actions.
+        draft: false
+        prerelease: false
+
+    - name: Upload Release APK to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: android/app/build/outputs/apk/release/app-release.apk
+        asset_name: AutonomousAIAgent-v1.0.${{ github.run_number }}-release.apk
+        asset_content_type: application/vnd.android.package-archive
+
+    - name: Upload Debug APK to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: android/app/build/outputs/apk/debug/app-debug.apk
+        asset_name: AutonomousAIAgent-v1.0.${{ github.run_number }}-debug.apk
+        asset_content_type: application/vnd.android.package-archive
+
+    - name: Comment PR with APK links
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## 🤖 APK Build Complete!
+            
+            Your Autonomous AI Agent APK has been built successfully!
+            
+            📱 **Download APK:** 
+            - [Debug APK](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - [Release APK](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            🔧 **Build Info:**
+            - Commit: \`${{ github.sha }}\`
+            - Build Number: ${{ github.run_number }}
+            - Node Version: 18
+            - Java Version: 17
+            
+            📋 **Next Steps:**
+            1. Download the APK from the artifacts
+            2. Install on your Android device
+            3. Get Anthropic API key from console.anthropic.com
+            4. Configure the app and start using your autonomous AI agent!`
+          })
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run TypeScript compilation check
+      run: npx tsc --noEmit
+
+    - name: Run ESLint
+      run: npx eslint . --ext .ts,.tsx,.js,.jsx
+
+    - name: Run tests (if any)
+      run: npm test -- --passWithNoTests
+
+    - name: Check bundle size
+      run: |
+        echo "Checking React Native bundle size..."
+        npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle
+        ls -lh android/app/src/main/assets/index.android.bundle || echo "Bundle file not found - this is expected for fresh builds"

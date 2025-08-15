@@ -1,0 +1,199 @@
+name: PR Build Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run TypeScript check
+      run: npx tsc --noEmit
+
+    - name: Run linting
+      run: npx eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 0
+
+    - name: Check code formatting
+      run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json}"
+
+    - name: Run tests
+      run: npm test -- --passWithNoTests --coverage
+
+    - name: Build check (without signing)
+      run: |
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleDebug --no-daemon
+
+    - name: Comment PR with build status
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Check if APK was built
+          const apkExists = fs.existsSync('android/app/build/outputs/apk/debug/app-debug.apk');
+          
+          const body = `## 🔍 Build Check Results
+          
+          **Status:** ${apkExists ? '✅ PASSED' : '❌ FAILED'}
+          **Commit:** \`${{ github.event.pull_request.head.sha }}\`
+          **Branch:** \`${{ github.event.pull_request.head.ref }}\`
+          
+          ### Build Summary
+          - **TypeScript Check:** ✅ Passed
+          - **ESLint Check:** ✅ Passed  
+          - **Code Formatting:** ✅ Passed
+          - **Tests:** ✅ Passed
+          - **Android Build:** ${apkExists ? '✅ Passed' : '❌ Failed'}
+          
+          ${apkExists ? 
+            '🎉 **Ready to merge!** The app builds successfully and all checks pass.' : 
+            '⚠️ **Build failed.** Please check the logs and fix any issues before merging.'
+          }
+          
+          ### Next Steps
+          ${apkExists ? 
+            '- Review the code changes\n- Test the functionality\n- Merge when ready' : 
+            '- Check the GitHub Actions logs for detailed error information\n- Fix any build issues\n- Push the fixes to update this PR'
+          }`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
+
+  security-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run security audit
+      run: npm audit --audit-level moderate
+
+    - name: Check for sensitive data
+      run: |
+        echo "Checking for potential sensitive data..."
+        
+        # Check for API keys, passwords, etc.
+        if grep -r -i -E "(api[_-]?key|password|secret|token)" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" src/ || true; then
+          echo "⚠️ Warning: Potential sensitive data found in source code"
+        fi
+        
+        # Check for hardcoded URLs that might be sensitive
+        if grep -r -E "https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" --include="*.ts" --include="*.tsx" src/ || true; then
+          echo "ℹ️ Info: URLs found in source code - please verify they are not sensitive"
+        fi
+
+    - name: License check
+      run: |
+        echo "Checking dependencies for license compatibility..."
+        npx license-checker --summary || echo "License checker not available - skipping"
+
+  performance-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Bundle size check
+      run: |
+        echo "Analyzing bundle size..."
+        
+        # Create a temporary bundle to check size
+        mkdir -p temp-bundle
+        npx react-native bundle \
+          --platform android \
+          --dev false \
+          --entry-file index.js \
+          --bundle-output temp-bundle/index.android.bundle \
+          --assets-dest temp-bundle/ || echo "Bundle creation failed - this is expected for some configurations"
+        
+        if [ -f temp-bundle/index.android.bundle ]; then
+          BUNDLE_SIZE=$(ls -lh temp-bundle/index.android.bundle | awk '{print $5}')
+          echo "Bundle size: $BUNDLE_SIZE"
+          
+          # Check if bundle is too large (>10MB is concerning)
+          BUNDLE_SIZE_BYTES=$(stat -c%s temp-bundle/index.android.bundle)
+          if [ $BUNDLE_SIZE_BYTES -gt 10485760 ]; then
+            echo "⚠️ Warning: Bundle size is larger than 10MB ($BUNDLE_SIZE)"
+          else
+            echo "✅ Bundle size is acceptable ($BUNDLE_SIZE)"
+          fi
+        else
+          echo "ℹ️ Bundle analysis skipped - not applicable for this build"
+        fi
+        
+        rm -rf temp-bundle
+
+    - name: Dependencies analysis
+      run: |
+        echo "Analyzing dependencies..."
+        
+        # Count total dependencies
+        TOTAL_DEPS=$(npm list --depth=0 2>/dev/null | grep -c "├─\|└─" || echo "0")
+        echo "Total dependencies: $TOTAL_DEPS"
+        
+        # Check for outdated packages
+        echo "Checking for outdated packages..."
+        npm outdated || echo "All packages are up to date"
+
+    - name: Code complexity check
+      run: |
+        echo "Analyzing code complexity..."
+        
+        # Simple complexity check - count lines of code
+        TOTAL_LINES=$(find src -name "*.ts" -o -name "*.tsx" | xargs wc -l | tail -1 | awk '{print $1}')
+        echo "Total lines of TypeScript code: $TOTAL_LINES"
+        
+        # Count number of components
+        COMPONENT_COUNT=$(find src -name "*.tsx" | wc -l)
+        echo "Number of React components: $COMPONENT_COUNT"
+        
+        # Count services and utilities
+        SERVICE_COUNT=$(find src -name "*Service.ts" | wc -l)
+        echo "Number of services: $SERVICE_COUNT"

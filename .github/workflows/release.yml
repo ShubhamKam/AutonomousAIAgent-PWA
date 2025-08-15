@@ -1,0 +1,313 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          android/.gradle
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Make Gradlew executable
+      run: chmod +x android/gradlew
+
+    - name: Generate release keystore
+      run: |
+        cd android/app
+        keytool -genkeypair -v -storetype PKCS12 -keystore release.keystore \
+          -alias release -keyalg RSA -keysize 2048 -validity 10000 \
+          -storepass ${{ secrets.KEYSTORE_PASSWORD || 'autonomous_ai_agent_2024' }} \
+          -keypass ${{ secrets.KEY_PASSWORD || 'autonomous_ai_agent_2024' }} \
+          -dname "CN=Autonomous AI Agent, OU=AI Development, O=ShubhamKam Technologies, L=Global, ST=Digital, C=WW"
+
+    - name: Create signing config
+      run: |
+        cat >> android/gradle.properties << EOF
+        MYAPP_RELEASE_STORE_FILE=release.keystore
+        MYAPP_RELEASE_KEY_ALIAS=release
+        MYAPP_RELEASE_STORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD || 'autonomous_ai_agent_2024' }}
+        MYAPP_RELEASE_KEY_PASSWORD=${{ secrets.KEY_PASSWORD || 'autonomous_ai_agent_2024' }}
+        EOF
+
+    - name: Update app version
+      run: |
+        # Extract version from tag or input
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION="${GITHUB_REF#refs/tags/}"
+        fi
+        
+        # Update version in package.json
+        npm version $VERSION --no-git-tag-version
+        
+        # Update Android version
+        VERSION_CODE=$(date +%s)
+        VERSION_NAME=${VERSION#v}
+        
+        sed -i "s/versionCode .*/versionCode $VERSION_CODE/" android/app/build.gradle
+        sed -i "s/versionName .*/versionName \"$VERSION_NAME\"/" android/app/build.gradle
+
+    - name: Update build.gradle for signing
+      run: |
+        # Backup original build.gradle
+        cp android/app/build.gradle android/app/build.gradle.backup
+        
+        # Add signing configuration
+        cat >> android/app/build.gradle << 'EOF'
+        
+        android {
+            signingConfigs {
+                release {
+                    if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
+                        storeFile file(MYAPP_RELEASE_STORE_FILE)
+                        storePassword MYAPP_RELEASE_STORE_PASSWORD
+                        keyAlias MYAPP_RELEASE_KEY_ALIAS
+                        keyPassword MYAPP_RELEASE_KEY_PASSWORD
+                    }
+                }
+            }
+            buildTypes {
+                release {
+                    signingConfig signingConfigs.release
+                    minifyEnabled true
+                    proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                }
+            }
+        }
+        EOF
+
+    - name: Clean project
+      run: |
+        cd android
+        ./gradlew clean
+
+    - name: Build Release APK
+      run: |
+        cd android
+        ./gradlew assembleRelease --no-daemon --stacktrace
+
+    - name: Build Release AAB (App Bundle)
+      run: |
+        cd android
+        ./gradlew bundleRelease --no-daemon --stacktrace
+
+    - name: Sign APK with apksigner
+      run: |
+        cd android/app/build/outputs/apk/release
+        $ANDROID_HOME/build-tools/*/apksigner sign --ks ../../release.keystore --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD || 'autonomous_ai_agent_2024' }} --key-pass pass:${{ secrets.KEY_PASSWORD || 'autonomous_ai_agent_2024' }} --out app-release-signed.apk app-release-unsigned.apk
+
+    - name: Verify APK signature
+      run: |
+        cd android/app/build/outputs/apk/release
+        $ANDROID_HOME/build-tools/*/apksigner verify app-release-signed.apk
+
+    - name: Get APK info
+      id: apk_info
+      run: |
+        APK_SIZE=$(ls -lh android/app/build/outputs/apk/release/app-release-signed.apk | awk '{print $5}')
+        echo "apk_size=$APK_SIZE" >> $GITHUB_OUTPUT
+        
+        # Get version info
+        VERSION_NAME=$(grep versionName android/app/build.gradle | sed 's/.*"\(.*\)".*/\1/')
+        VERSION_CODE=$(grep versionCode android/app/build.gradle | sed 's/.*\([0-9]\+\).*/\1/')
+        echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+        echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.inputs.version || github.ref_name }}
+        release_name: Autonomous AI Agent ${{ github.event.inputs.version || github.ref_name }}
+        body: |
+          ## 🤖 Autonomous AI Agent - Official Release
+          
+          ### 📱 Download & Installation
+          **APK Size:** ${{ steps.apk_info.outputs.apk_size }}
+          **Version:** ${{ steps.apk_info.outputs.version_name }} (Build ${{ steps.apk_info.outputs.version_code }})
+          
+          1. **Download** the signed APK below
+          2. **Enable** "Install from Unknown Sources" in Android settings
+          3. **Install** the APK on your device
+          4. **Get your API key** from [console.anthropic.com](https://console.anthropic.com)
+          5. **Configure** the app and start using your autonomous AI agent!
+          
+          ### 🚀 Features
+          - **🤖 Fully Autonomous Operation** - Three autonomy levels (supervised, semi-autonomous, fully-autonomous)
+          - **💬 Advanced Chat Interface** - Real-time messaging with context awareness
+          - **📋 Smart Task Management** - Automatic task creation, prioritization, and execution
+          - **🧠 Memory System** - Context preservation and intelligent memory management
+          - **⚙️ Comprehensive Settings** - Full control over AI behavior and preferences
+          - **🔗 Claude API Integration** - Powered by Anthropic's advanced AI technology
+          - **📱 Modern UI/UX** - Native Android interface with smooth animations
+          - **💾 Local Data Storage** - Secure offline storage of conversations and settings
+          
+          ### 🔧 System Requirements
+          - **Android 7.0+** (API level 24 or higher)
+          - **2GB RAM** minimum (4GB recommended)
+          - **100MB** free storage space
+          - **Internet connection** for AI functionality
+          - **Microphone permission** for voice features (optional)
+          
+          ### 🆕 What's New in This Release
+          - Initial production release
+          - Full autonomous AI agent capabilities
+          - Advanced task management system
+          - Memory and context preservation
+          - Voice interaction framework (ready for future updates)
+          - Comprehensive settings and configuration options
+          
+          ### 🔐 Security & Privacy
+          - All data stored locally on your device
+          - API keys encrypted and stored securely
+          - No data collection or telemetry
+          - Open source code available for review
+          
+          ### 🐛 Known Issues
+          - Voice features require additional setup (coming in future updates)
+          - Image processing capabilities planned for next release
+          - Background operation improvements in development
+          
+          ### 📞 Support
+          - **GitHub Issues:** [Report bugs or request features](https://github.com/ShubhamKam/claudetest/issues)
+          - **Documentation:** Check the repository README for detailed setup instructions
+          
+          ---
+          
+          **Built with:** React Native • TypeScript • Anthropic Claude API • Android Gradle Plugin
+          
+          **Release Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')
+          **Commit:** ${{ github.sha }}
+          
+          🤖 *This autonomous AI agent truly bridges the gap between mind and action!*
+        draft: false
+        prerelease: false
+
+    - name: Upload Signed APK
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: android/app/build/outputs/apk/release/app-release-signed.apk
+        asset_name: AutonomousAIAgent-${{ steps.apk_info.outputs.version_name }}-release.apk
+        asset_content_type: application/vnd.android.package-archive
+
+    - name: Upload App Bundle (AAB)
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: android/app/build/outputs/bundle/release/app-release.aab
+        asset_name: AutonomousAIAgent-${{ steps.apk_info.outputs.version_name }}-release.aab
+        asset_content_type: application/octet-stream
+
+    - name: Create GitHub Pages deployment info
+      run: |
+        mkdir -p docs
+        cat > docs/download.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Autonomous AI Agent - Download</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+                .header { text-align: center; margin-bottom: 40px; }
+                .download-btn { background: #007AFF; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; margin: 10px; }
+                .feature { margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 8px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🤖 Autonomous AI Agent</h1>
+                <p>The future of AI-powered mobile assistance</p>
+            </div>
+            
+            <div class="feature">
+                <h3>🚀 Latest Release: v${{ steps.apk_info.outputs.version_name }}</h3>
+                <p>Download the latest version of your autonomous AI agent companion.</p>
+                <a href="https://github.com/ShubhamKam/claudetest/releases/latest" class="download-btn">📱 Download APK</a>
+                <a href="https://github.com/ShubhamKam/claudetest" class="download-btn">📚 View Source</a>
+            </div>
+            
+            <div class="feature">
+                <h3>✨ Features</h3>
+                <ul>
+                    <li>🤖 Fully autonomous AI operation</li>
+                    <li>💬 Real-time chat interface</li>
+                    <li>📋 Smart task management</li>
+                    <li>🧠 Context-aware memory system</li>
+                    <li>⚙️ Comprehensive settings</li>
+                </ul>
+            </div>
+            
+            <div class="feature">
+                <h3>📋 Requirements</h3>
+                <ul>
+                    <li>Android 7.0+ (API 24+)</li>
+                    <li>Internet connection</li>
+                    <li>Anthropic API key</li>
+                </ul>
+            </div>
+        </body>
+        </html>
+        EOF
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
+        cname: # Add your custom domain if you have one
+
+    - name: Send notification
+      run: |
+        echo "🎉 Autonomous AI Agent v${{ steps.apk_info.outputs.version_name }} has been released!"
+        echo "📱 APK Size: ${{ steps.apk_info.outputs.apk_size }}"
+        echo "🔗 Download: https://github.com/ShubhamKam/claudetest/releases/latest"
