@@ -1,0 +1,157 @@
+name: Simple Android Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Cache node modules
+      uses: actions/cache@v3
+      with:
+        path: AutonomousAIAgent/node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('AutonomousAIAgent/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install dependencies
+      working-directory: AutonomousAIAgent
+      run: |
+        npm install --legacy-peer-deps
+        
+    - name: Fix React Native dependencies
+      working-directory: AutonomousAIAgent
+      run: |
+        # Fix potential Android issues
+        npx react-native doctor || true
+        
+    - name: Make Gradlew executable
+      working-directory: AutonomousAIAgent
+      run: chmod +x android/gradlew
+
+    - name: Clean Gradle
+      working-directory: AutonomousAIAgent
+      run: |
+        cd android
+        ./gradlew clean || true
+
+    - name: Build Debug APK
+      working-directory: AutonomousAIAgent
+      run: |
+        cd android
+        ./gradlew assembleDebug --no-daemon --stacktrace --info
+      continue-on-error: false
+
+    - name: Check APK was created
+      working-directory: AutonomousAIAgent
+      run: |
+        if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+          echo "✅ APK build successful!"
+          ls -lh android/app/build/outputs/apk/debug/app-debug.apk
+        else
+          echo "❌ APK build failed - file not found"
+          echo "Checking build directory structure:"
+          find android/app/build -name "*.apk" || true
+          exit 1
+        fi
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: AutonomousAIAgent-Debug
+        path: AutonomousAIAgent/android/app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 30
+
+    - name: Create Release
+      if: success()
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: build-${{ github.run_number }}
+        release_name: Autonomous AI Agent Build ${{ github.run_number }}
+        body: |
+          ## 🤖 Autonomous AI Agent - Debug Build
+          
+          **Build Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')
+          **Build Number:** ${{ github.run_number }}
+          **Commit:** ${{ github.sha }}
+          
+          ### 📱 Installation Instructions
+          1. Download the APK file below
+          2. Enable "Install from Unknown Sources" in Android Settings
+          3. Install the APK on your device
+          4. Get Anthropic API key from console.anthropic.com
+          5. Configure and enjoy your autonomous AI agent!
+          
+          ### 🚀 Features
+          - Fully autonomous AI agent with 3 autonomy levels
+          - Real-time chat interface with context awareness
+          - Advanced task management system
+          - Memory management with persistence
+          - Modern React Native UI
+          
+          **Note:** This is a debug build for testing purposes.
+        draft: false
+        prerelease: true
+
+    - name: Upload APK to Release
+      if: success()
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: AutonomousAIAgent/android/app/build/outputs/apk/debug/app-debug.apk
+        asset_name: AutonomousAIAgent-Debug-Build${{ github.run_number }}.apk
+        asset_content_type: application/vnd.android.package-archive
+
+    - name: Build Failed - Debug Info
+      if: failure()
+      working-directory: AutonomousAIAgent
+      run: |
+        echo "🔍 BUILD FAILURE DEBUG INFORMATION"
+        echo "=================================="
+        
+        echo "📁 Project Structure:"
+        ls -la
+        
+        echo -e "\n📦 Node Modules Status:"
+        ls -la node_modules/ | head -10
+        
+        echo -e "\n🔧 Gradle Status:"
+        cd android
+        ls -la
+        
+        echo -e "\n📝 Build Logs (last 50 lines):"
+        if [ -f android/app/build/outputs/logs/gradle.log ]; then
+          tail -50 android/app/build/outputs/logs/gradle.log
+        fi
+        
+        echo -e "\n💾 Available APKs:"
+        find android -name "*.apk" || echo "No APK files found"
+        
+        echo -e "\n🚨 This information will help debug the build failure"
