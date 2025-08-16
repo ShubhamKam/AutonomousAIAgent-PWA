@@ -10,11 +10,6 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     
-    <!-- Ionic Framework -->
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
-    <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
-    
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -43,33 +38,6 @@
             --icon-gradient-1: linear-gradient(135deg, #6366F1, #8B5CF6);
             --icon-gradient-2: linear-gradient(135deg, #10B981, #059669);
             --icon-gradient-3: linear-gradient(135deg, #F59E0B, #D97706);
-            
-            /* Ionic Theme Customization - Commence Colors */
-            --ion-color-primary: #6366F1;
-            --ion-color-primary-rgb: 99, 102, 241;
-            --ion-color-primary-contrast: #ffffff;
-            --ion-color-primary-contrast-rgb: 255, 255, 255;
-            --ion-color-primary-shade: #5856d4;
-            --ion-color-primary-tint: #7378f2;
-            
-            --ion-color-secondary: #10B981;
-            --ion-color-secondary-rgb: 16, 185, 129;
-            --ion-color-secondary-contrast: #ffffff;
-            --ion-color-secondary-contrast-rgb: 255, 255, 255;
-            --ion-color-secondary-shade: #0ea572;
-            --ion-color-secondary-tint: #28c390;
-            
-            --ion-background-color: #0A0A0B;
-            --ion-background-color-rgb: 10, 10, 11;
-            --ion-text-color: #FFFFFF;
-            --ion-text-color-rgb: 255, 255, 255;
-            --ion-color-step-50: #1A1A1D;
-            --ion-color-step-100: #2A2A2E;
-            --ion-color-step-150: #3A3A40;
-            --ion-color-step-200: #4A4A50;
-            --ion-toolbar-background: #1A1A1D;
-            --ion-toolbar-color: #FFFFFF;
-            --ion-item-background: #2A2A2E;
         }
 
         * {
@@ -85,36 +53,27 @@
             min-height: 100vh;
             margin: 0;
             padding: 0;
-            /* Cordova/Mobile app optimizations */
+            /* Enhanced mobile optimizations */
             -webkit-touch-callout: none;
             -webkit-text-size-adjust: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: rgba(0,0,0,0);
-            /* Remove centering for mobile app */
-            display: block;
+            /* Default web styling */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        /* Cordova app container */
-        body.cordova {
+        /* Enhanced mobile detection and container */
+        body.cordova,
+        body.mobile-app {
             display: block;
             padding: 0;
+            align-items: stretch;
+            justify-content: stretch;
         }
 
-        .cordova .app-container {
-            height: 100vh;
-            border-radius: 0;
-            max-width: none;
-            width: 100vw;
-            box-shadow: none;
-            margin: 0;
-            /* Handle safe areas for notched devices */
-            padding-top: env(safe-area-inset-top, 0);
-            padding-bottom: env(safe-area-inset-bottom, 0);
-            padding-left: env(safe-area-inset-left, 0);
-            padding-right: env(safe-area-inset-right, 0);
-        }
-
-        /* Default web styling */
         .app-container {
             width: 100%;
             max-width: 400px;
@@ -126,7 +85,23 @@
             overflow: hidden;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             position: relative;
-            margin: 20px auto;
+            margin: 0 auto;
+        }
+
+        /* Enhanced mobile container */
+        .cordova .app-container,
+        .mobile-app .app-container {
+            height: 100vh;
+            border-radius: 0;
+            max-width: none;
+            width: 100vw;
+            box-shadow: none;
+            margin: 0;
+            /* Handle safe areas for notched devices */
+            padding-top: env(safe-area-inset-top, 0);
+            padding-bottom: env(safe-area-inset-bottom, 0);
+            padding-left: env(safe-area-inset-left, 0);
+            padding-right: env(safe-area-inset-right, 0);
         }
 
         /* Auto-detect mobile app and apply styles */
@@ -146,8 +121,7 @@
             }
         }
 
-
-        /* Header - Enhanced for mobile */
+        /* Enhanced Header - Critical mobile fix */
         .header {
             padding: 12px 16px;
             background: var(--commence-container);
@@ -155,9 +129,9 @@
             flex-shrink: 0;
             min-height: 56px;
             box-sizing: border-box;
+            /* CRITICAL: Mobile header stability */
             position: relative;
             z-index: 1000;
-            /* Ensure header is always visible */
             display: flex;
             align-items: center;
             width: 100%;
@@ -165,6 +139,11 @@
             padding-top: max(12px, env(safe-area-inset-top, 0));
             padding-left: max(16px, env(safe-area-inset-left, 0));
             padding-right: max(16px, env(safe-area-inset-right, 0));
+            /* Prevent header from disappearing */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         .header-content {
@@ -997,6 +976,11 @@
             .header {
                 padding: 12px 16px;
                 min-height: 52px;
+                /* Ensure visibility on all mobile devices */
+                position: sticky;
+                top: 0;
+                background: var(--commence-container);
+                border-bottom: 1px solid var(--commence-surface);
             }
 
             .logo {
@@ -1045,90 +1029,31 @@
                 font-size: 16px;
             }
         }
-
-        /* Ionic Component Customizations */
-        ion-segment {
-            margin: 8px 16px;
-            border-radius: 12px;
-        }
-        
-        ion-segment-button {
-            --color: var(--commence-gray);
-            --color-checked: var(--commence-white);
-            --background-checked: var(--commence-primary);
-            --indicator-color: transparent;
-        }
-        
-        ion-header ion-toolbar {
-            --background: var(--commence-container);
-            --color: var(--commence-white);
-            --border-color: var(--commence-surface);
-        }
-        
-        ion-content {
-            --background: var(--commence-bg);
-            --color: var(--commence-white);
-        }
-        
-        ion-item {
-            --background: var(--commence-card);
-            --color: var(--commence-white);
-            --border-color: var(--commence-surface);
-        }
-        
-        ion-textarea {
-            --color: var(--commence-white);
-            --placeholder-color: var(--commence-gray);
-        }
-        
-        ion-button {
-            --color: var(--commence-primary);
-        }
-        
-        ion-menu-button {
-            --color: var(--commence-white);
-        }
-        
-        /* Ensure Ionic components work in dark theme */
-        ion-app.ios {
-            --ion-background-color: var(--commence-bg);
-            --ion-text-color: var(--commence-white);
-        }
-        
-        ion-app.md {
-            --ion-background-color: var(--commence-bg);
-            --ion-text-color: var(--commence-white);
-        }
     </style>
 </head>
 <body>
-    <ion-app>
-        <div class="app-container">
-            <!-- Ionic Header - Never disappears in mobile! -->
-            <ion-header>
-                <ion-toolbar color="dark">
-                    <ion-buttons slot="start">
-                        <ion-menu-button onclick="toggleSidebar()"></ion-menu-button>
-                    </ion-buttons>
-                    
-                    <ion-title>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div class="logo-icon" style="width: 28px; height: 28px;"></div>
-                            <span>Commence</span>
-                        </div>
-                    </ion-title>
-                    
-                    <ion-buttons slot="end">
-                        <div id="user-info" class="user-profile" style="display: none; margin-right: 12px;">
-                            <div class="user-avatar" id="user-avatar">U</div>
-                            <span id="user-name">User</span>
-                        </div>
-                        <ion-button fill="clear" onclick="logout()" id="logout-btn" style="display: none;">
-                            <ion-icon name="log-out-outline"></ion-icon>
-                        </ion-button>
-                    </ion-buttons>
-                </ion-toolbar>
-            </ion-header>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon"></div>
+                    <span>Commence</span>
+                </div>
+                <div class="header-actions">
+                    <div id="user-info" class="user-profile" style="display: none;">
+                        <div class="user-avatar" id="user-avatar">U</div>
+                        <span id="user-name">User</span>
+                    </div>
+                    <button class="icon-btn" onclick="toggleSidebar()">
+                        <span class="material-icons">menu</span>
+                    </button>
+                    <button class="icon-btn" onclick="logout()" id="logout-btn" style="display: none;">
+                        <span class="material-icons">logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Authentication Screen -->
         <div id="auth-screen" class="auth-container" style="display: flex;">
@@ -1250,32 +1175,34 @@
 
         <!-- Main App -->
         <div id="main-app" style="display: none; flex: 1; flex-direction: column;">
-            <!-- Ionic Navigation Tabs -->
-            <ion-segment value="chats" color="primary" onionchange="switchSectionIonic(event)">
-                <ion-segment-button value="chats">
-                    <ion-icon name="chatbubbles-outline"></ion-icon>
-                    <ion-label>Chats</ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="projects">
-                    <ion-icon name="folder-outline"></ion-icon>
-                    <ion-label>Projects</ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="tasks">
-                    <ion-icon name="checkmark-circle-outline"></ion-icon>
-                    <ion-label>Tasks</ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="tools">
-                    <ion-icon name="extension-puzzle-outline"></ion-icon>
-                    <ion-label>Tools</ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="settings">
-                    <ion-icon name="settings-outline"></ion-icon>
-                    <ion-label>Settings</ion-label>
-                </ion-segment-button>
-            </ion-segment>
+            <!-- Navigation Bar -->
+            <div class="nav-bar">
+                <div class="nav-container">
+                    <button class="nav-btn active" onclick="switchSection('chats')">
+                        <span class="material-icons">chat</span>
+                        <span>Chats</span>
+                    </button>
+                    <button class="nav-btn" onclick="switchSection('projects')">
+                        <span class="material-icons">folder</span>
+                        <span>Projects</span>
+                    </button>
+                    <button class="nav-btn" onclick="switchSection('tasks')">
+                        <span class="material-icons">task_alt</span>
+                        <span>Tasks</span>
+                    </button>
+                    <button class="nav-btn" onclick="switchSection('tools')">
+                        <span class="material-icons">extension</span>
+                        <span>Tools</span>
+                    </button>
+                    <button class="nav-btn" onclick="switchSection('settings')">
+                        <span class="material-icons">settings</span>
+                        <span>Settings</span>
+                    </button>
+                </div>
+            </div>
 
-            <!-- Ionic Content -->
-            <ion-content class="content">
+            <!-- Content -->
+            <div class="content">
                 <!-- Chats Section -->
                 <div id="chats-section" class="tab-content active">
                     <div class="chat-header" style="margin: -20px -20px 20px -20px;">
@@ -1496,36 +1423,26 @@
                         </div>
                     </div>
                 </div>
-            </ion-content>
+            </div>
 
-            <!-- Ionic Input Area (only visible in chats) -->
-            <div id="input-container" style="padding: 0;">
-                <ion-toolbar>
-                    <ion-item fill="outline" style="margin: 8px;">
-                        <ion-textarea 
-                            id="message-input"
-                            placeholder="Ask me anything..." 
-                            rows="1"
-                            auto-grow="true"
-                            maxlength="500"
-                            onkeydown="handleKeyPress(event)"
-                            oninput="autoResize(this)"
-                        ></ion-textarea>
-                        <ion-button 
-                            id="send-btn" 
-                            slot="end" 
-                            fill="clear" 
-                            onclick="sendMessage()" 
-                            disabled
-                        >
-                            <ion-icon name="send"></ion-icon>
-                        </ion-button>
-                    </ion-item>
-                </ion-toolbar>
+            <!-- Input Area (only visible in chats) -->
+            <div class="input-container" id="input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="message-input" 
+                        class="message-input" 
+                        placeholder="Ask me anything..." 
+                        rows="1"
+                        onkeydown="handleKeyPress(event)"
+                        oninput="autoResize(this)"
+                    ></textarea>
+                    <button id="send-btn" class="send-btn" onclick="sendMessage()" disabled>
+                        <span class="material-icons">send</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-    </ion-app>
 
     <script>
         let apiKey = '';
@@ -1548,38 +1465,30 @@
         }
 
         function initializeApp() {
-            // Detect Cordova and apply mobile optimizations
-            if (window.cordova || navigator.userAgent.includes('Android') || navigator.userAgent.includes('iPhone')) {
-                document.body.classList.add('cordova');
-                console.log('📱 Mobile app detected - applying Cordova optimizations');
+            // Enhanced mobile detection and optimizations
+            if (window.cordova || navigator.userAgent.includes('Android') || navigator.userAgent.includes('iPhone') || window.navigator.standalone) {
+                document.body.classList.add('cordova', 'mobile-app');
+                console.log('📱 Mobile app detected - applying enhanced optimizations');
                 
                 // Hide splash screen if available
                 if (navigator.splashscreen) {
                     navigator.splashscreen.hide();
                 }
                 
-                // Set status bar style if available
+                // Enhanced status bar handling
                 if (window.StatusBar) {
                     StatusBar.styleDefault();
                     StatusBar.overlaysWebView(false);
+                    StatusBar.backgroundColorByHexString('#1A1A1D');
                 }
             }
             
-            // Initialize input handling for both regular and Ionic components
             const input = document.getElementById('message-input');
             const sendBtn = document.getElementById('send-btn');
             
             if (input && sendBtn) {
-                // Handle both regular input and Ionic textarea events
                 input.addEventListener('input', function() {
-                    const value = this.value ? this.value.trim() : '';
-                    sendBtn.disabled = !value;
-                });
-                
-                // Also listen for Ionic-specific events
-                input.addEventListener('ionInput', function(e) {
-                    const value = e.detail.value ? e.detail.value.trim() : '';
-                    sendBtn.disabled = !value;
+                    sendBtn.disabled = !this.value.trim();
                 });
             }
 
@@ -1798,25 +1707,6 @@
             closeSidebar();
         }
 
-        // Ionic segment handler
-        function switchSectionIonic(event) {
-            const section = event.detail.value;
-            
-            // Update content sections
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            document.getElementById(section + '-section').classList.add('active');
-            
-            // Show/hide input area based on section
-            const inputContainer = document.getElementById('input-container');
-            if (section === 'chats') {
-                inputContainer.style.display = 'block';
-            } else {
-                inputContainer.style.display = 'none';
-            }
-            
-            currentSection = section;
-        }
-
         // Sidebar Functions
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -1957,14 +1847,13 @@
 
         async function sendMessage() {
             const input = document.getElementById('message-input');
-            const text = input.value ? input.value.trim() : '';
+            const text = input.value.trim();
             
             if (!text) return;
             
             addMessage('user', text);
             input.value = '';
-            // Handle both regular textarea and ionic textarea
-            if (input.style) input.style.height = 'auto';
+            input.style.height = 'auto';
             document.getElementById('send-btn').disabled = true;
             
             showTyping();
@@ -2005,7 +1894,7 @@
         async function getDemoResponse(text) {
             await new Promise(r => setTimeout(r, 1000 + Math.random() * 1000));
             
-            return `⚡ **Commence AI Response**\n\nYour message: "${text}"\n\nI'm running in demo mode with the new Commence workspace interface! \n\n**Available in full version:**\n• Real Claude AI responses\n• Project management\n• Task tracking\n• Tools integration\n• Advanced conversation handling\n\nConnect your API key to unlock full functionality! ✨`;
+            return `⚡ **Commence AI Response**\n\nYour message: "${text}"\n\nI'm running in demo mode with the beautiful Commence workspace interface! \n\n**Available in full version:**\n• Real Claude AI responses\n• Project management\n• Task tracking\n• Tools integration\n• Advanced conversation handling\n\nConnect your API key to unlock full functionality! ✨`;
         }
 
         async function getClaudeResponse(text) {
@@ -2080,7 +1969,7 @@
                 if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
                     console.warn('📱 Direct API call failed, using demo mode');
                     await new Promise(r => setTimeout(r, 1000 + Math.random() * 1000));
-                    return `⚡ **Commence (Mobile Mode)**\n\nYour message: "${text}"\n\nI'm running with the beautiful Commence workspace interface! The app automatically detects mobile environment and adapts accordingly.\n\n**🔄 Next APK Build Will Include:**\n• Native HTTP requests via Cordova plugin\n• Full Claude API functionality\n• Authentication system\n• Project & task management\n• Zero CORS restrictions\n\n**Current Capabilities:**\n• Professional Commence interface ✅\n• User authentication ✅\n• Navigation system (Chats, Projects, Tasks, Tools) ✅\n• Mobile-optimized design ✅\n• Secure storage integration ✅\n\nReady to provide full AI assistance once the updated APK is installed! 🎯`;
+                    return `⚡ **Commence (Mobile Mode)**\n\nYour message: "${text}"\n\nI'm running with the beautiful Commence workspace interface! The app automatically detects mobile environment and adapts accordingly.\n\n**🔄 Next APK Build Will Include:**\n• Native HTTP requests via Cordova plugin\n• Full Claude API functionality\n• Authentication system\n• Project & task management\n• Zero CORS restrictions\n\n**Current Capabilities:**\n• Professional Commence interface ✅\n• User authentication ✅\n• Navigation system (Chats, Projects, Tasks, Tools) ✅\n• Mobile-optimized design ✅\n• Enhanced header stability ✅\n• Secure storage integration ✅\n\nReady to provide full AI assistance once the updated APK is installed! 🎯`;
                 } else {
                     throw error;
                 }
