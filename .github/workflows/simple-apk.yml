@@ -1,9 +1,14 @@
-name: Simple APK Build
+name: Cordova APK Build
 
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   workflow_dispatch:
+  schedule:
+    - cron: '*/10 * * * *'  # Run every 10 minutes as backup
 
 jobs:
   build:
