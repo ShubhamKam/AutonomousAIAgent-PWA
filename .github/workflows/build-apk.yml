@@ -13,6 +13,14 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       
+    - name: Debug - Show current structure
+      run: |
+        echo "🔍 Current directory:"
+        pwd
+        ls -la
+        echo "📁 Looking for web files:"
+        ls -la *.html || echo "No HTML files found"
+        
     - name: Setup Node.js 
       uses: actions/setup-node@v4
       with:
@@ -28,60 +36,111 @@ jobs:
       uses: android-actions/setup-android@v3
       
     - name: Accept licenses
-      run: yes | sdkmanager --licenses
+      run: yes | sdkmanager --licenses || true
       
-    - name: Create basic package.json
-      run: |
-        cat > package.json << 'EOF'
-        {
-          "name": "autonomous-ai-agent",
-          "version": "1.0.0",
-          "scripts": {
-            "build": "echo build"
-          },
-          "dependencies": {
-            "@capacitor/android": "^5.0.0",
-            "@capacitor/core": "^5.0.0",
-            "@capacitor/cli": "^5.0.0"
-          }
-        }
-        EOF
-        
-    - name: Install Capacitor
-      run: |
-        npm install
-        npm install -g @capacitor/cli@5
-        
-    - name: Setup Capacitor config
-      run: |
-        cat > capacitor.config.json << 'EOF'
-        {
-          "appId": "com.autonomousai.agent", 
-          "appName": "AutonomousAIAgent",
-          "webDir": "www",
-          "bundledWebRuntime": false
-        }
-        EOF
-        
+    - name: Install Capacitor CLI
+      run: npm install -g @capacitor/cli@5
+      
     - name: Setup web directory
       run: |
+        echo "🔧 Setting up web directory..."
         mkdir -p www
-        cp fixed-final.html www/index.html || cp index.html www/index.html || echo '<h1>AI Agent</h1>' > www/index.html
+        
+        # Find and copy the main HTML file
+        if [ -f "fixed-final.html" ]; then
+          echo "✅ Found fixed-final.html"
+          cp fixed-final.html www/index.html
+        elif [ -f "index.html" ]; then
+          echo "✅ Found index.html"
+          cp index.html www/index.html
+        else
+          echo "⚠️ Creating basic HTML"
+          cat > www/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Autonomous AI Agent</title>
+            <style>
+                body { font-family: Arial, sans-serif; background: #0d0d0d; color: #fff; text-align: center; padding: 50px; }
+                h1 { color: #ff6600; }
+            </style>
+        </head>
+        <body>
+            <h1>🤖 Autonomous AI Agent</h1>
+            <p>Professional AI Agent Mobile App</p>
+        </body>
+        </html>
+        EOF
+        fi
+        
+        # Copy additional files if they exist
+        cp *.js www/ 2>/dev/null || true
+        
+        echo "📁 Web directory contents:"
+        ls -la www/
+        
+    - name: Initialize Capacitor
+      run: |
+        echo "🔧 Initializing Capacitor..."
+        npx cap init "AutonomousAIAgent" "com.autonomousai.agent" --web-dir=www
+        
+        echo "📄 Capacitor config created:"
+        cat capacitor.config.json
         
     - name: Add Android platform
-      run: npx cap add android
-      
+      run: |
+        echo "📱 Adding Android platform..."
+        npx cap add android
+        
+        echo "📁 Checking android directory:"
+        ls -la android/ || echo "❌ Android directory not created"
+        
     - name: Sync project
-      run: npx cap sync android
-      
+      run: |
+        echo "🔄 Syncing Capacitor..."
+        npx cap sync android
+        
+    - name: Debug - Check Android structure
+      run: |
+        echo "🔍 Android directory structure:"
+        if [ -d "android" ]; then
+          ls -la android/
+          echo "📱 Android app directory:"
+          ls -la android/app/ || echo "No app directory"
+          echo "🛠️ Gradlew file:"
+          ls -la android/gradlew || echo "No gradlew file"
+        else
+          echo "❌ Android directory missing"
+          exit 1
+        fi
+        
     - name: Build APK
       run: |
+        echo "🔨 Building APK..."
         cd android
         chmod +x ./gradlew
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug --stacktrace
+        
+        echo "📱 APK location:"
+        find . -name "*.apk" -type f || echo "❌ No APK found"
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
+      if: success()
       with:
         name: app-debug
         path: android/app/build/outputs/apk/debug/app-debug.apk
+        
+    - name: Debug failure info
+      if: failure()
+      run: |
+        echo "🔍 BUILD FAILURE DEBUG INFORMATION"
+        echo "=================================="
+        echo "📁 Project Structure:"
+        ls -la
+        echo "📦 Node Modules Status:"
+        ls -la node_modules/ || echo "No node_modules"
+        echo "🔧 Gradle Status:"
+        cd android 2>/dev/null && ls -la || echo "No android directory"
