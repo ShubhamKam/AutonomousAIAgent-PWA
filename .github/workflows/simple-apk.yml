@@ -76,16 +76,18 @@ jobs:
         echo "📁 Web directory contents:"
         ls -la www/
         
-    - name: Install Capacitor HTTP Plugin
+    - name: Install HTTP Plugin for Cordova
       run: |
         cd autonomous-ai
-        echo "📱 Installing Capacitor HTTP Plugin..."
-        npm install @capacitor/core @capacitor/http
+        echo "📱 Installing HTTP Plugin for Cordova..."
         
-        # Add Capacitor script to index.html
-        sed -i '/<head>/a\    <script type="module" src="https://unpkg.com/@capacitor/core@latest/dist/capacitor.js"></script>' www/index.html
+        # Install cordova-plugin-advanced-http (works better than Capacitor in Cordova)
+        cordova plugin add cordova-plugin-advanced-http
         
-        echo "✅ Capacitor HTTP Plugin configured"
+        # Also add network information plugin
+        cordova plugin add cordova-plugin-network-information
+        
+        echo "✅ HTTP Plugin configured for Cordova"
         
     - name: Add Android platform
       run: |
