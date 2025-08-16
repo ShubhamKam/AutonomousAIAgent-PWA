@@ -1,0 +1,108 @@
+name: Simple APK Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Accept licenses
+      run: yes | sdkmanager --licenses || true
+      
+    - name: Find project files
+      run: |
+        echo "🔍 Searching for project files..."
+        find . -name "fixed-final.html" -o -name "index.html" | head -5
+        
+        # Set working directory
+        if find . -name "fixed-final.html" | grep -q .; then
+          PROJECT_DIR=$(find . -name "fixed-final.html" | head -1 | xargs dirname)
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+          echo "✅ Found project in: $PROJECT_DIR"
+        else
+          echo "PROJECT_DIR=." >> $GITHUB_ENV
+          echo "⚠️ Using root directory"
+        fi
+        
+    - name: Install Cordova
+      run: npm install -g cordova
+      
+    - name: Create Cordova project
+      run: |
+        echo "📱 Creating Cordova project..."
+        cordova create autonomous-ai com.autonomousai.agent "AutonomousAIAgent"
+        cd autonomous-ai
+        
+        # Copy web files
+        echo "📁 Copying web files..."
+        if [ -f "../${{ env.PROJECT_DIR }}/fixed-final.html" ]; then
+          cp "../${{ env.PROJECT_DIR }}/fixed-final.html" www/index.html
+          echo "✅ Copied fixed-final.html"
+        elif [ -f "../${{ env.PROJECT_DIR }}/index.html" ]; then
+          cp "../${{ env.PROJECT_DIR }}/index.html" www/index.html
+          echo "✅ Copied index.html"
+        else
+          echo "⚠️ Using default HTML"
+        fi
+        
+        # Copy additional files
+        cp ../${{ env.PROJECT_DIR }}/*.js www/ 2>/dev/null || true
+        
+        echo "📁 Web directory contents:"
+        ls -la www/
+        
+    - name: Add Android platform
+      run: |
+        cd autonomous-ai
+        echo "📱 Adding Android platform..."
+        cordova platform add android
+        
+        echo "📁 Checking platforms:"
+        cordova platform list
+        
+    - name: Build APK
+      run: |
+        cd autonomous-ai
+        echo "🔨 Building APK..."
+        cordova build android
+        
+        echo "📱 Finding APK:"
+        find . -name "*.apk" -type f
+        
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: autonomous-ai-apk
+        path: autonomous-ai/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+        
+    - name: Create Release
+      if: github.event_name == 'push'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: cordova-v${{ github.run_number }}
+        name: Cordova APK v${{ github.run_number }}
+        files: autonomous-ai/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
