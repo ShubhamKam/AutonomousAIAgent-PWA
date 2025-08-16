@@ -76,6 +76,17 @@ jobs:
         echo "📁 Web directory contents:"
         ls -la www/
         
+    - name: Install Capacitor HTTP Plugin
+      run: |
+        cd autonomous-ai
+        echo "📱 Installing Capacitor HTTP Plugin..."
+        npm install @capacitor/core @capacitor/http
+        
+        # Add Capacitor script to index.html
+        sed -i '/<head>/a\    <script type="module" src="https://unpkg.com/@capacitor/core@latest/dist/capacitor.js"></script>' www/index.html
+        
+        echo "✅ Capacitor HTTP Plugin configured"
+        
     - name: Add Android platform
       run: |
         cd autonomous-ai
