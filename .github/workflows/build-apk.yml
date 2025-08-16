@@ -18,8 +18,40 @@ jobs:
         echo "🔍 Current directory:"
         pwd
         ls -la
-        echo "📁 Looking for web files:"
-        ls -la *.html || echo "No HTML files found"
+        echo "📁 Looking for subdirectories:"
+        find . -name "*.html" -type f | head -10
+        echo "📁 Looking for project files:"
+        find . -name "fixed-final.html" -o -name "capacitor.config.json" -o -name "package.json" | head -10
+        
+    - name: Navigate to correct directory
+      run: |
+        echo "🔍 Finding the correct project directory..."
+        if [ -f "fixed-final.html" ]; then
+          echo "✅ Files found in root directory"
+          PROJECT_DIR="."
+        elif [ -f "AutonomousAIAgent-PWA/fixed-final.html" ]; then
+          echo "✅ Files found in AutonomousAIAgent-PWA directory"
+          PROJECT_DIR="AutonomousAIAgent-PWA"
+          cd AutonomousAIAgent-PWA
+        elif [ -f "AutonomousAIAgent/fixed-final.html" ]; then
+          echo "✅ Files found in AutonomousAIAgent directory"
+          PROJECT_DIR="AutonomousAIAgent"
+          cd AutonomousAIAgent
+        else
+          echo "🔍 Searching all directories..."
+          PROJECT_DIR=$(find . -name "fixed-final.html" -type f | head -1 | xargs dirname)
+          if [ -n "$PROJECT_DIR" ] && [ "$PROJECT_DIR" != "." ]; then
+            echo "✅ Found project in: $PROJECT_DIR"
+            cd "$PROJECT_DIR"
+          else
+            echo "⚠️ Using root directory"
+            PROJECT_DIR="."
+          fi
+        fi
+        echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+        echo "📁 Current working directory:"
+        pwd
+        ls -la
         
     - name: Setup Node.js 
       uses: actions/setup-node@v4
@@ -42,8 +74,10 @@ jobs:
       run: npm install -g @capacitor/cli@5
       
     - name: Setup web directory
+      working-directory: ${{ env.PROJECT_DIR }}
       run: |
         echo "🔧 Setting up web directory..."
+        echo "📁 Current directory: $(pwd)"
         mkdir -p www
         
         # Find and copy the main HTML file
@@ -82,29 +116,37 @@ jobs:
         ls -la www/
         
     - name: Initialize Capacitor
+      working-directory: ${{ env.PROJECT_DIR }}
       run: |
         echo "🔧 Initializing Capacitor..."
+        echo "📁 Working in: $(pwd)"
         npx cap init "AutonomousAIAgent" "com.autonomousai.agent" --web-dir=www
         
         echo "📄 Capacitor config created:"
         cat capacitor.config.json
         
     - name: Add Android platform
+      working-directory: ${{ env.PROJECT_DIR }}
       run: |
         echo "📱 Adding Android platform..."
+        echo "📁 Working in: $(pwd)"
         npx cap add android
         
         echo "📁 Checking android directory:"
         ls -la android/ || echo "❌ Android directory not created"
         
     - name: Sync project
+      working-directory: ${{ env.PROJECT_DIR }}
       run: |
         echo "🔄 Syncing Capacitor..."
+        echo "📁 Working in: $(pwd)"
         npx cap sync android
         
     - name: Debug - Check Android structure
+      working-directory: ${{ env.PROJECT_DIR }}
       run: |
         echo "🔍 Android directory structure:"
+        echo "📁 Working in: $(pwd)"
         if [ -d "android" ]; then
           ls -la android/
           echo "📱 Android app directory:"
@@ -117,8 +159,10 @@ jobs:
         fi
         
     - name: Build APK
+      working-directory: ${{ env.PROJECT_DIR }}
       run: |
         echo "🔨 Building APK..."
+        echo "📁 Working in: $(pwd)"
         cd android
         chmod +x ./gradlew
         ./gradlew assembleDebug --stacktrace
@@ -131,7 +175,7 @@ jobs:
       if: success()
       with:
         name: app-debug
-        path: android/app/build/outputs/apk/debug/app-debug.apk
+        path: ${{ env.PROJECT_DIR }}/android/app/build/outputs/apk/debug/app-debug.apk
         
     - name: Debug failure info
       if: failure()
