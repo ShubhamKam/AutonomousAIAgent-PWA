@@ -720,6 +720,272 @@
             }
         }
 
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 320px;
+            height: 100vh;
+            background: var(--commence-container);
+            border-right: 1px solid var(--commence-surface);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--commence-surface);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--commence-gray);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            color: var(--commence-white);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-item:hover {
+            background: var(--commence-card);
+        }
+
+        .sidebar-item.active {
+            background: var(--commence-primary);
+        }
+
+        .sidebar-item .material-icons {
+            font-size: 20px;
+            color: var(--commence-gray);
+        }
+
+        .sidebar-item.active .material-icons {
+            color: var(--commence-white);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Project and Task specific styles */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--commence-white);
+        }
+
+        .create-btn {
+            background: var(--commence-primary);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: var(--commence-white);
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .create-btn:hover {
+            background: var(--commence-primary-light);
+            transform: translateY(-1px);
+        }
+
+        .project-card, .task-card {
+            background: var(--commence-card);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--commence-surface);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .project-card:hover, .task-card:hover {
+            border-color: var(--commence-primary);
+            transform: translateY(-1px);
+        }
+
+        .project-title, .task-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: var(--commence-white);
+        }
+
+        .project-meta, .task-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--commence-gray);
+            margin-bottom: 12px;
+        }
+
+        .project-actions, .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: var(--commence-surface);
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            color: var(--commence-white);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--commence-primary);
+        }
+
+        .action-btn.primary {
+            background: var(--commence-primary);
+        }
+
+        .action-btn.success {
+            background: var(--commence-accent);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--commence-gray);
+        }
+
+        .empty-state .material-icons {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--commence-surface);
+            background: var(--commence-container);
+        }
+
+        .chat-title {
+            font-weight: 600;
+            color: var(--commence-white);
+        }
+
+        .chat-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-tab {
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: var(--commence-card);
+            border: none;
+            color: var(--commence-gray);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chat-tab.active {
+            background: var(--commence-primary);
+            color: var(--commence-white);
+        }
+
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .file-card {
+            background: var(--commence-card);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--commence-surface);
+        }
+
+        .file-card:hover {
+            border-color: var(--commence-primary);
+        }
+
+        .file-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: var(--commence-primary);
+        }
+
+        .file-name {
+            font-size: 12px;
+            color: var(--commence-white);
+            word-break: break-word;
+        }
+
         /* Status Indicators */
         .status-online {
             width: 8px;
@@ -868,6 +1134,75 @@
                 </div>
             </div>
         </div>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon"></div>
+                    <span>Commence</span>
+                </div>
+                <button class="icon-btn" onclick="closeSidebar()">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Navigation</div>
+                    <div class="sidebar-item active" onclick="switchSectionFromSidebar('chats')">
+                        <span class="material-icons">chat</span>
+                        <span>Chats</span>
+                    </div>
+                    <div class="sidebar-item" onclick="switchSectionFromSidebar('projects')">
+                        <span class="material-icons">folder</span>
+                        <span>Projects</span>
+                    </div>
+                    <div class="sidebar-item" onclick="switchSectionFromSidebar('tasks')">
+                        <span class="material-icons">task_alt</span>
+                        <span>Tasks</span>
+                    </div>
+                    <div class="sidebar-item" onclick="switchSectionFromSidebar('tools')">
+                        <span class="material-icons">extension</span>
+                        <span>Tools</span>
+                    </div>
+                    <div class="sidebar-item" onclick="switchSectionFromSidebar('settings')">
+                        <span class="material-icons">settings</span>
+                        <span>Settings</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Recent Chats</div>
+                    <div class="sidebar-item" onclick="loadChat('general')">
+                        <span class="material-icons">chat_bubble</span>
+                        <span>General Chat</span>
+                    </div>
+                    <div class="sidebar-item" onclick="loadChat('coding')">
+                        <span class="material-icons">code</span>
+                        <span>Coding Help</span>
+                    </div>
+                    <div class="sidebar-item" onclick="loadChat('planning')">
+                        <span class="material-icons">event_note</span>
+                        <span>Project Planning</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Projects</div>
+                    <div class="sidebar-item" onclick="openProject('website')">
+                        <span class="material-icons">web</span>
+                        <span>Website Redesign</span>
+                    </div>
+                    <div class="sidebar-item" onclick="openProject('mobile')">
+                        <span class="material-icons">mobile_friendly</span>
+                        <span>Mobile App</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Overlay -->
+        <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
 
         <!-- Main App -->
         <div id="main-app" style="display: none; flex: 1; flex-direction: column;">
@@ -1209,6 +1544,151 @@
             document.getElementById(section + '-section').classList.add('active');
             
             currentSection = section;
+        }
+
+        function switchSectionFromSidebar(section) {
+            // Update sidebar items
+            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.nav-btn[onclick*="${section}"]`).classList.add('active');
+            
+            // Update content sections
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(section + '-section').classList.add('active');
+            
+            currentSection = section;
+            closeSidebar();
+        }
+
+        // Sidebar Functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (sidebar.classList.contains('open')) {
+                closeSidebar();
+            } else {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+            }
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('active');
+        }
+
+        // Chat Functions
+        function switchChatTab(tab) {
+            document.querySelectorAll('.chat-tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tab === 'conversation') {
+                document.getElementById('chat-conversation').style.display = 'flex';
+                document.getElementById('chat-files').style.display = 'none';
+            } else {
+                document.getElementById('chat-conversation').style.display = 'none';
+                document.getElementById('chat-files').style.display = 'block';
+            }
+        }
+
+        function loadChat(chatId) {
+            // Load specific chat conversation
+            document.getElementById('messages').innerHTML = '';
+            addMessage('agent', `Loading ${chatId} chat...`);
+            closeSidebar();
+        }
+
+        // Project Functions
+        function createProject() {
+            const projectName = prompt('Enter project name:');
+            if (projectName) {
+                // Create new project
+                const projectsContainer = document.getElementById('projects-list');
+                const newProject = document.createElement('div');
+                newProject.className = 'project-card';
+                newProject.onclick = () => openProject(projectName.toLowerCase().replace(/\s+/g, '-'));
+                newProject.innerHTML = `
+                    <div class="project-title">${projectName}</div>
+                    <div class="project-meta">
+                        <span>0 chats</span>
+                        <span>0 files</span>
+                        <span>Just created</span>
+                    </div>
+                    <div class="project-actions">
+                        <button class="action-btn primary" onclick="event.stopPropagation(); openProjectChat('${projectName}')">Open Chat</button>
+                        <button class="action-btn" onclick="event.stopPropagation(); viewProjectFiles('${projectName}')">Files</button>
+                        <button class="action-btn" onclick="event.stopPropagation(); editProject('${projectName}')">Edit</button>
+                    </div>
+                `;
+                projectsContainer.appendChild(newProject);
+            }
+        }
+
+        function openProject(projectId) {
+            alert(`Opening project: ${projectId}. This will show project details, chats, and files.`);
+        }
+
+        function openProjectChat(projectName) {
+            // Switch to chats section and load project-specific chat
+            switchSectionFromSidebar('chats');
+            document.querySelector('.chat-title').textContent = `${projectName} Chat`;
+            document.getElementById('messages').innerHTML = '';
+            addMessage('agent', `Welcome to the ${projectName} project chat! I can help you with this project's development.`);
+        }
+
+        function viewProjectFiles(projectName) {
+            alert(`Viewing files for ${projectName}. This will show all artifacts and files generated for this project.`);
+        }
+
+        function editProject(projectName) {
+            const newName = prompt('Edit project name:', projectName);
+            if (newName && newName !== projectName) {
+                event.target.closest('.project-card').querySelector('.project-title').textContent = newName;
+            }
+        }
+
+        // Task Functions
+        function createTask() {
+            const taskName = prompt('Enter task description:');
+            if (taskName) {
+                const tasksContainer = document.getElementById('tasks-list');
+                const newTask = document.createElement('div');
+                newTask.className = 'task-card';
+                newTask.innerHTML = `
+                    <div class="task-title">${taskName}</div>
+                    <div class="task-meta">
+                        <span>Medium Priority</span>
+                        <span>No due date</span>
+                        <span>General</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn success" onclick="completeTask(this)">Mark Done</button>
+                        <button class="action-btn" onclick="editTask(this)">Edit</button>
+                    </div>
+                `;
+                tasksContainer.appendChild(newTask);
+            }
+        }
+
+        function completeTask(button) {
+            const taskCard = button.closest('.task-card');
+            taskCard.style.opacity = '0.5';
+            taskCard.style.textDecoration = 'line-through';
+            button.textContent = 'Completed';
+            button.disabled = true;
+        }
+
+        function editTask(button) {
+            const taskCard = button.closest('.task-card');
+            const taskTitle = taskCard.querySelector('.task-title');
+            const newTitle = prompt('Edit task:', taskTitle.textContent);
+            if (newTitle) {
+                taskTitle.textContent = newTitle;
+            }
         }
 
         function showApp() {
