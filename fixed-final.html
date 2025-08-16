@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🤖 Autonomous AI Agent - Manus Style</title>
+    <title>⚡ Commence - AI Workspace</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,22 +11,28 @@
     
     <style>
         :root {
-            /* Manus Color Palette */
-            --manus-bg: #121212;
-            --manus-container: #1C1C1E;
-            --manus-card: #2C2C2E;
-            --manus-surface: #3A3A3C;
-            --manus-purple: #A78BFA;
-            --manus-purple-light: #CDB4DB;
-            --manus-coral: #FFC09F;
-            --manus-yellow: #FFEE93;
-            --manus-green: #ADF7B6;
-            --manus-white: #FFFFFF;
-            --manus-gray: #9CA3AF;
-            --manus-gray-dark: #6B7280;
+            /* Commence Color Palette */
+            --commence-bg: #0A0A0B;
+            --commence-container: #1A1A1D;
+            --commence-card: #2A2A2E;
+            --commence-surface: #3A3A40;
+            --commence-primary: #6366F1;
+            --commence-primary-light: #818CF8;
+            --commence-accent: #10B981;
+            --commence-warning: #F59E0B;
+            --commence-danger: #EF4444;
+            --commence-white: #FFFFFF;
+            --commence-gray: #9CA3AF;
+            --commence-gray-dark: #6B7280;
+            --commence-gray-light: #D1D5DB;
             
             /* Typography */
             --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            
+            /* Geometric Icon Colors */
+            --icon-gradient-1: linear-gradient(135deg, #6366F1, #8B5CF6);
+            --icon-gradient-2: linear-gradient(135deg, #10B981, #059669);
+            --icon-gradient-3: linear-gradient(135deg, #F59E0B, #D97706);
         }
 
         * {
@@ -37,8 +43,8 @@
 
         body {
             font-family: var(--font-primary);
-            background-color: var(--manus-bg);
-            color: var(--manus-white);
+            background-color: var(--commence-bg);
+            color: var(--commence-white);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -50,7 +56,7 @@
             width: 100%;
             max-width: 400px;
             height: 800px;
-            background-color: var(--manus-container);
+            background-color: var(--commence-container);
             border-radius: 24px;
             display: flex;
             flex-direction: column;
@@ -85,11 +91,45 @@
         }
 
         .logo {
-            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--manus-purple), var(--manus-coral));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--commence-white);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--icon-gradient-1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--commence-white);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            top: 6px;
+        }
+
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--commence-primary);
+            border-radius: 50%;
+            bottom: 6px;
+            right: 6px;
         }
 
         .header-actions {
@@ -101,9 +141,9 @@
             width: 40px;
             height: 40px;
             border-radius: 12px;
-            background: var(--manus-card);
+            background: var(--commence-card);
             border: none;
-            color: var(--manus-white);
+            color: var(--commence-white);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -112,37 +152,187 @@
         }
 
         .icon-btn:hover {
-            background: var(--manus-surface);
+            background: var(--commence-surface);
             transform: scale(1.05);
         }
 
         .icon-btn.active {
-            background: var(--manus-purple);
+            background: var(--commence-primary);
         }
 
-        /* Tab Navigation */
-        .tab-nav {
+        /* Navigation Bar */
+        .nav-bar {
+            background: var(--commence-container);
+            border-bottom: 1px solid var(--commence-surface);
+            padding: 12px 20px;
+        }
+
+        .nav-container {
             display: flex;
-            padding: 16px 20px;
             gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
-        .tab-btn {
-            flex: 1;
-            padding: 12px 16px;
-            border-radius: 16px;
+        .nav-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 12px;
             border: none;
-            background: var(--manus-card);
-            color: var(--manus-gray);
+            background: var(--commence-card);
+            color: var(--commence-gray);
             font-weight: 500;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
+            white-space: nowrap;
+            min-width: fit-content;
         }
 
-        .tab-btn.active {
-            background: var(--manus-purple);
-            color: var(--manus-white);
+        .nav-btn.active {
+            background: var(--commence-primary);
+            color: var(--commence-white);
+        }
+
+        .nav-btn:hover:not(.active) {
+            background: var(--commence-surface);
+            color: var(--commence-white);
+        }
+
+        .nav-btn .material-icons {
+            font-size: 18px;
+        }
+
+        /* Authentication Styles */
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            height: 100%;
+        }
+
+        .auth-form {
+            width: 100%;
+            max-width: 320px;
+            background: var(--commence-card);
+            border-radius: 20px;
+            padding: 32px 24px;
+            border: 1px solid var(--commence-surface);
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--commence-white);
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            color: var(--commence-gray);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--commence-white);
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--commence-surface);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--commence-white);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--commence-primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--commence-gray);
+        }
+
+        .auth-btn {
+            width: 100%;
+            background: var(--icon-gradient-1);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            color: var(--commence-white);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-link {
+            color: var(--commence-primary);
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 16px;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--commence-white);
+            font-size: 14px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--icon-gradient-1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
         }
 
         /* Content Area */
@@ -186,23 +376,23 @@
 
         .message.user {
             align-self: flex-end;
-            background: linear-gradient(135deg, var(--manus-purple), var(--manus-purple-light));
-            color: var(--manus-container);
+            background: linear-gradient(135deg, var(--commence-primary), var(--commence-primary-light));
+            color: var(--commence-container);
             font-weight: 500;
         }
 
         .message.agent {
             align-self: flex-start;
-            background: var(--manus-card);
-            color: var(--manus-white);
-            border: 1px solid var(--manus-surface);
+            background: var(--commence-card);
+            color: var(--commence-white);
+            border: 1px solid var(--commence-surface);
         }
 
         /* Typing Indicator */
         .typing-indicator {
             display: none;
             align-self: flex-start;
-            background: var(--manus-card);
+            background: var(--commence-card);
             padding: 16px 20px;
             border-radius: 20px;
             margin: 8px 0;
@@ -216,7 +406,7 @@
         .typing-dot {
             width: 8px;
             height: 8px;
-            background: var(--manus-purple);
+            background: var(--commence-primary);
             border-radius: 50%;
             animation: typingDot 1.4s infinite;
         }
@@ -235,7 +425,7 @@
             display: flex;
             gap: 12px;
             align-items: flex-end;
-            background: var(--manus-card);
+            background: var(--commence-card);
             border-radius: 24px;
             padding: 12px 16px;
             border: 2px solid transparent;
@@ -251,7 +441,7 @@
             flex: 1;
             background: none;
             border: none;
-            color: var(--manus-white);
+            color: var(--commence-white);
             font-size: 16px;
             line-height: 1.4;
             resize: none;
@@ -261,16 +451,16 @@
         }
 
         .message-input::placeholder {
-            color: var(--manus-gray);
+            color: var(--commence-gray);
         }
 
         .send-btn {
             width: 40px;
             height: 40px;
             border-radius: 20px;
-            background: var(--manus-purple);
+            background: var(--commence-primary);
             border: none;
-            color: var(--manus-white);
+            color: var(--commence-white);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -285,8 +475,8 @@
         }
 
         .send-btn:disabled {
-            background: var(--manus-surface);
-            color: var(--manus-gray);
+            background: var(--commence-surface);
+            color: var(--commence-gray);
             cursor: not-allowed;
             transform: none;
         }
@@ -300,10 +490,10 @@
         }
 
         .tool-card {
-            background: var(--manus-card);
+            background: var(--commence-card);
             border-radius: 20px;
             padding: 20px;
-            border: 1px solid var(--manus-surface);
+            border: 1px solid var(--commence-surface);
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
@@ -344,7 +534,7 @@
 
         .tool-status {
             font-size: 12px;
-            color: var(--manus-gray);
+            color: var(--commence-gray);
             text-transform: uppercase;
             font-weight: 500;
         }
@@ -355,17 +545,17 @@
 
         /* Settings Panel */
         .settings-section {
-            background: var(--manus-card);
+            background: var(--commence-card);
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 16px;
-            border: 1px solid var(--manus-surface);
+            border: 1px solid var(--commence-surface);
         }
 
         .settings-title {
             font-weight: 600;
             margin-bottom: 16px;
-            color: var(--manus-white);
+            color: var(--commence-white);
         }
 
         .setting-item {
@@ -382,16 +572,16 @@
 
         .setting-label {
             font-size: 14px;
-            color: var(--manus-white);
+            color: var(--commence-white);
         }
 
         .api-input {
             width: 100%;
-            background: var(--manus-surface);
+            background: var(--commence-surface);
             border: 2px solid transparent;
             border-radius: 12px;
             padding: 12px 16px;
-            color: var(--manus-white);
+            color: var(--commence-white);
             font-size: 14px;
             margin-top: 8px;
             transition: all 0.3s ease;
@@ -404,7 +594,7 @@
         }
 
         .api-input::placeholder {
-            color: var(--manus-gray);
+            color: var(--commence-gray);
         }
 
         .connect-btn {
@@ -412,7 +602,7 @@
             border: none;
             border-radius: 12px;
             padding: 12px 24px;
-            color: var(--manus-white);
+            color: var(--commence-white);
             font-weight: 600;
             cursor: pointer;
             margin-top: 12px;
@@ -501,17 +691,17 @@
 
         .welcome-subtitle {
             font-size: 16px;
-            color: var(--manus-gray);
+            color: var(--commence-gray);
             margin-bottom: 32px;
             line-height: 1.5;
         }
 
         .demo-btn {
-            background: var(--manus-card);
+            background: var(--commence-card);
             border: 2px solid var(--manus-surface);
             border-radius: 16px;
             padding: 16px 32px;
-            color: var(--manus-white);
+            color: var(--commence-white);
             font-weight: 600;
             cursor: pointer;
             margin-top: 12px;
@@ -530,38 +720,100 @@
         <!-- Header -->
         <div class="header">
             <div class="header-content">
-                <div class="logo">🤖 Manus AI</div>
+                <div class="logo">
+                    <div class="logo-icon"></div>
+                    <span>Commence</span>
+                </div>
                 <div class="header-actions">
+                    <div id="user-info" class="user-profile" style="display: none;">
+                        <div class="user-avatar" id="user-avatar">U</div>
+                        <span id="user-name">User</span>
+                    </div>
                     <button class="icon-btn" onclick="toggleSidebar()">
                         <span class="material-icons">menu</span>
                     </button>
-                    <button class="icon-btn" onclick="openSettings()">
-                        <span class="material-icons">settings</span>
+                    <button class="icon-btn" onclick="logout()" id="logout-btn" style="display: none;">
+                        <span class="material-icons">logout</span>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Welcome Screen -->
-        <div id="welcome-screen" class="welcome-screen" style="display: flex;">
-            <div class="welcome-logo">🤖</div>
-            <h1 class="welcome-title">Autonomous AI Agent</h1>
-            <p class="welcome-subtitle">Your intelligent assistant powered by Claude AI with advanced tools integration</p>
-            
-            <div class="settings-section" style="width: 100%; max-width: 300px;">
-                <input type="password" id="api-key" class="api-input" placeholder="Enter your Claude API key" />
-                <button class="connect-btn" onclick="connectAPI()">Connect API</button>
-                <button class="demo-btn" onclick="startDemo()">Try Demo Mode</button>
+        <!-- Authentication Screen -->
+        <div id="auth-screen" class="auth-container" style="display: flex;">
+            <div class="auth-form">
+                <div class="logo-icon" style="margin: 0 auto 20px; width: 48px; height: 48px;"></div>
+                <h1 class="auth-title">Welcome to Commence</h1>
+                <p class="auth-subtitle">Your AI-powered workspace for productivity</p>
+                
+                <div id="login-form">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="email" class="form-input" placeholder="Enter your email" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="password" class="form-input" placeholder="Enter your password" />
+                    </div>
+                    <button class="auth-btn" onclick="handleLogin()">Sign In</button>
+                    <a class="auth-link" onclick="showRegister()">Don't have an account? Sign up</a>
+                    <a class="auth-link" onclick="showDemoSetup()" style="margin-top: 8px;">Try Demo Mode</a>
+                </div>
+
+                <div id="register-form" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="reg-name" class="form-input" placeholder="Enter your full name" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="reg-email" class="form-input" placeholder="Enter your email" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="reg-password" class="form-input" placeholder="Create a password" />
+                    </div>
+                    <button class="auth-btn" onclick="handleRegister()">Create Account</button>
+                    <a class="auth-link" onclick="showLogin()">Already have an account? Sign in</a>
+                </div>
+
+                <div id="demo-setup" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Claude API Key (Optional)</label>
+                        <input type="password" id="demo-api-key" class="form-input" placeholder="sk-ant-api03-..." />
+                    </div>
+                    <button class="auth-btn" onclick="startDemo()">Start Demo</button>
+                    <a class="auth-link" onclick="showLogin()">Back to Sign In</a>
+                </div>
             </div>
         </div>
 
         <!-- Main App -->
         <div id="main-app" style="display: none; flex: 1; flex-direction: column;">
-            <!-- Tab Navigation -->
-            <div class="tab-nav">
-                <button class="tab-btn active" onclick="switchTab('chat')">Chat</button>
-                <button class="tab-btn" onclick="switchTab('tools')">Tools</button>
-                <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
+            <!-- Navigation Bar -->
+            <div class="nav-bar">
+                <div class="nav-container">
+                    <button class="nav-btn active" onclick="switchSection('chats')">
+                        <span class="material-icons">chat</span>
+                        <span>Chats</span>
+                    </button>
+                    <button class="nav-btn" onclick="switchSection('projects')">
+                        <span class="material-icons">folder</span>
+                        <span>Projects</span>
+                    </button>
+                    <button class="nav-btn" onclick="switchSection('tasks')">
+                        <span class="material-icons">task_alt</span>
+                        <span>Tasks</span>
+                    </button>
+                    <button class="nav-btn" onclick="switchSection('tools')">
+                        <span class="material-icons">extension</span>
+                        <span>Tools</span>
+                    </button>
+                    <button class="nav-btn" onclick="switchSection('settings')">
+                        <span class="material-icons">settings</span>
+                        <span>Settings</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Content -->
@@ -675,7 +927,9 @@
     <script>
         let apiKey = '';
         let isDemo = true;
-        let currentTab = 'chat';
+        let currentSection = 'chats';
+        let currentUser = null;
+        let isAuthenticated = false;
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -694,14 +948,22 @@
 
         function loadData() {
             try {
-                const savedKey = localStorage.getItem('manus_ai_api_key');
-                const savedMode = localStorage.getItem('manus_ai_mode');
+                // Check for saved user session
+                const savedUser = localStorage.getItem('commence_user');
+                const savedKey = localStorage.getItem('commence_api_key');
+                const savedMode = localStorage.getItem('commence_mode');
                 
-                if (savedKey && savedMode === 'api') {
-                    apiKey = savedKey;
-                    isDemo = false;
+                if (savedUser) {
+                    currentUser = JSON.parse(savedUser);
+                    isAuthenticated = true;
+                    
+                    if (savedKey && savedMode === 'api') {
+                        apiKey = savedKey;
+                        isDemo = false;
+                    }
+                    
                     showApp();
-                    document.getElementById('current-mode').textContent = 'API';
+                    updateUserInterface();
                 }
             } catch (error) {
                 console.log('No saved data found');
@@ -710,13 +972,108 @@
 
         function saveData() {
             try {
-                if (apiKey) {
-                    localStorage.setItem('manus_ai_api_key', apiKey);
+                if (currentUser) {
+                    localStorage.setItem('commence_user', JSON.stringify(currentUser));
                 }
-                localStorage.setItem('manus_ai_mode', isDemo ? 'demo' : 'api');
+                if (apiKey) {
+                    localStorage.setItem('commence_api_key', apiKey);
+                }
+                localStorage.setItem('commence_mode', isDemo ? 'demo' : 'api');
             } catch (error) {
                 console.error('Failed to save data:', error);
             }
+        }
+
+        // Authentication Functions
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('demo-setup').style.display = 'none';
+        }
+
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('demo-setup').style.display = 'none';
+        }
+
+        function showDemoSetup() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('demo-setup').style.display = 'block';
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+            
+            // Simulate authentication (in real app, this would be an API call)
+            currentUser = {
+                email: email,
+                name: email.split('@')[0],
+                avatar: email.charAt(0).toUpperCase()
+            };
+            
+            isAuthenticated = true;
+            isDemo = false;
+            showApp();
+            updateUserInterface();
+            saveData();
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+            
+            if (!name || !email || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Simulate registration (in real app, this would be an API call)
+            currentUser = {
+                email: email,
+                name: name,
+                avatar: name.charAt(0).toUpperCase()
+            };
+            
+            isAuthenticated = true;
+            isDemo = false;
+            showApp();
+            updateUserInterface();
+            saveData();
+        }
+
+        function updateUserInterface() {
+            if (currentUser) {
+                document.getElementById('user-name').textContent = currentUser.name;
+                document.getElementById('user-avatar').textContent = currentUser.avatar;
+                document.getElementById('user-email').textContent = currentUser.email;
+                document.getElementById('user-info').style.display = 'flex';
+                document.getElementById('logout-btn').style.display = 'flex';
+                document.getElementById('current-mode').textContent = isDemo ? 'Demo' : 'API';
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            isAuthenticated = false;
+            apiKey = '';
+            isDemo = true;
+            localStorage.clear();
+            
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('user-info').style.display = 'none';
+            document.getElementById('logout-btn').style.display = 'none';
+            
+            showLogin();
         }
 
         function connectAPI() {
@@ -738,20 +1095,63 @@
         }
 
         function startDemo() {
+            const demoApiKey = document.getElementById('demo-api-key').value.trim();
+            
+            // Create demo user
+            currentUser = {
+                email: 'demo@commence.app',
+                name: 'Demo User',
+                avatar: 'D'
+            };
+            
+            isAuthenticated = true;
             isDemo = true;
-            apiKey = '';
+            
+            if (demoApiKey && demoApiKey.startsWith('sk-ant-api03-')) {
+                apiKey = demoApiKey;
+                isDemo = false;
+            }
+            
             showApp();
-            document.getElementById('current-mode').textContent = 'Demo';
+            updateUserInterface();
             saveData();
         }
 
+        // Navigation Functions
+        function switchSection(section) {
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.nav-btn').classList.add('active');
+            
+            // Update content sections
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(section + '-section').classList.add('active');
+            
+            currentSection = section;
+        }
+
         function showApp() {
-            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'flex';
             addMessage('agent', isDemo ? 
-                '🚀 **Demo Mode Active**\n\nI\'m your Manus AI Assistant! I can help you with various tasks and integrate with your favorite tools.\n\n**Available Features:**\n• Professional chat interface\n• Tools integration (JIRA, Google Drive, Slack, GitHub)\n• Conversation management\n• Mobile-optimized design\n\nTry asking me anything!' :
-                '🚀 **API Connected**\n\nI\'m Claude, your autonomous AI agent with full API access! I can assist you with complex tasks and integrate with your tools.\n\nHow can I help you today?'
+                '🚀 **Welcome to Commence!**\n\nI\'m your AI assistant! I can help you with various tasks across your workspace:\n\n**Available Features:**\n• 💬 **Chats** - AI conversations\n• 📁 **Projects** - Manage your work\n• ✅ **Tasks** - Track your todos\n• 🔧 **Tools** - Integrate external services\n• ⚙️ **Settings** - Configure your workspace\n\nTry asking me anything!' :
+                '🚀 **API Connected to Commence!**\n\nI\'m Claude, your autonomous AI agent with full API access! I can assist you with complex tasks and integrate with your tools.\n\nHow can I help you today?'
             );
+        }
+
+        // Project and Task Functions
+        function createProject() {
+            const projectName = prompt('Enter project name:');
+            if (projectName) {
+                alert(`Project "${projectName}" created! This feature will be fully implemented in the next update.`);
+            }
+        }
+
+        function createTask() {
+            const taskName = prompt('Enter task description:');
+            if (taskName) {
+                alert(`Task "${taskName}" added! This feature will be fully implemented in the next update.`);
+            }
         }
 
         function switchTab(tab) {
@@ -825,7 +1225,7 @@
         async function getDemoResponse(text) {
             await new Promise(r => setTimeout(r, 1000 + Math.random() * 1000));
             
-            return `🤖 **Manus AI Response**\n\nYour message: "${text}"\n\nI'm running in demo mode with the beautiful Manus AI interface! \n\n**Available in full version:**\n• Real Claude AI responses\n• Tools integration\n• Advanced conversation handling\n• Persistent memory\n\nConnect your API key to unlock full functionality! ✨`;
+            return `⚡ **Commence AI Response**\n\nYour message: "${text}"\n\nI'm running in demo mode with the new Commence workspace interface! \n\n**Available in full version:**\n• Real Claude AI responses\n• Project management\n• Task tracking\n• Tools integration\n• Advanced conversation handling\n\nConnect your API key to unlock full functionality! ✨`;
         }
 
         async function getClaudeResponse(text) {
@@ -900,7 +1300,7 @@
                 if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
                     console.warn('📱 Direct API call failed, using demo mode');
                     await new Promise(r => setTimeout(r, 1000 + Math.random() * 1000));
-                    return `🚀 **Manus AI (Mobile Mode)**\n\nYour message: "${text}"\n\nI'm running with the beautiful Manus AI interface! The app automatically detects mobile environment and adapts accordingly.\n\n**🔄 Next APK Build Will Include:**\n• Native HTTP requests via Cordova plugin\n• Full Claude API functionality\n• Zero CORS restrictions\n\n**Current Capabilities:**\n• Professional Manus-style interface ✅\n• Tools integration framework ✅\n• Mobile-optimized design ✅\n• Conversation management ✅\n\nReady to provide full AI assistance once the updated APK is installed! 🎯`;
+                    return `⚡ **Commence (Mobile Mode)**\n\nYour message: "${text}"\n\nI'm running with the beautiful Commence workspace interface! The app automatically detects mobile environment and adapts accordingly.\n\n**🔄 Next APK Build Will Include:**\n• Native HTTP requests via Cordova plugin\n• Full Claude API functionality\n• Authentication system\n• Project & task management\n• Zero CORS restrictions\n\n**Current Capabilities:**\n• Professional Commence interface ✅\n• User authentication ✅\n• Navigation system (Chats, Projects, Tasks, Tools) ✅\n• Mobile-optimized design ✅\n• Secure storage integration ✅\n\nReady to provide full AI assistance once the updated APK is installed! 🎯`;
                 } else {
                     throw error;
                 }

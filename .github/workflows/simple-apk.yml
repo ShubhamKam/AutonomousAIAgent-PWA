@@ -76,18 +76,33 @@ jobs:
         echo "📁 Web directory contents:"
         ls -la www/
         
-    - name: Install HTTP Plugin for Cordova
+    - name: Install Cordova Plugins
       run: |
         cd autonomous-ai
-        echo "📱 Installing HTTP Plugin for Cordova..."
+        echo "📱 Installing Cordova plugins for Commence app..."
         
-        # Install cordova-plugin-advanced-http (works better than Capacitor in Cordova)
+        # Core HTTP and networking
         cordova plugin add cordova-plugin-advanced-http
-        
-        # Also add network information plugin
         cordova plugin add cordova-plugin-network-information
         
-        echo "✅ HTTP Plugin configured for Cordova"
+        # Authentication and storage
+        cordova plugin add cordova-plugin-secure-storage
+        cordova plugin add cordova-plugin-keychain
+        cordova plugin add cordova-plugin-fingerprint-aio
+        
+        # Device features
+        cordova plugin add cordova-plugin-device
+        cordova plugin add cordova-plugin-statusbar
+        cordova plugin add cordova-plugin-splashscreen
+        
+        # File system and camera (for future features)
+        cordova plugin add cordova-plugin-file
+        cordova plugin add cordova-plugin-camera
+        
+        # Notifications
+        cordova plugin add cordova-plugin-local-notification
+        
+        echo "✅ All Cordova plugins configured for Commence"
         
     - name: Add Android platform
       run: |
