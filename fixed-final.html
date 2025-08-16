@@ -1119,21 +1119,62 @@ All conversations encrypted. Tools available in TOOLS tab.`;
         }
 
         async function getClaudeResponse(text) {
-            const response = await fetch('/api/anthropic', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    apiKey: apiKey,
-                    message: text,
-                    systemPrompt: 'You are an autonomous AI agent with access to external tools. Be professional and helpful.'
-                })
-            });
+            try {
+                // Direct Claude API call for mobile
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-3-sonnet-20240229',
+                        max_tokens: 1024,
+                        messages: [{
+                            role: 'user',
+                            content: text
+                        }],
+                        system: 'You are an autonomous AI agent with Bloomberg Terminal interface. Provide professional, concise responses. You have access to external tools like JIRA, Google Drive, Slack, and GitHub when needed.'
+                    })
+                });
 
-            if (response.ok) {
-                const data = await response.json();
-                return data.content[0].text;
-            } else {
-                throw new Error('API request failed');
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.content[0].text;
+                } else if (response.status === 401) {
+                    throw new Error('Invalid API key. Please check your Claude API key.');
+                } else if (response.status === 429) {
+                    throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+                } else {
+                    const errorData = await response.json().catch(() => null);
+                    throw new Error(errorData?.error?.message || `API request failed (${response.status})`);
+                }
+            } catch (error) {
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    // Fallback for CORS issues - use a demo response
+                    console.warn('Direct API call failed, using demo mode');
+                    await new Promise(r => setTimeout(r, 1000 + Math.random() * 1000));
+                    return `AUTONOMOUS AI RESPONSE (Demo Mode):
+
+"${text}"
+
+📱 Mobile Response: I'm running in demonstration mode because direct API access is restricted in this mobile environment. 
+
+For full functionality:
+• Use the web version for direct Claude API access
+• Or set up a proxy server for mobile API calls
+
+🔧 Current Capabilities:
+• Professional Bloomberg Terminal interface
+• Tools integration framework (JIRA, Google Drive, etc.)
+• Chat history and conversation management
+• Mobile-optimized responsive design
+
+Note: Connect to a proxy server or use the web version for full Claude API integration.`;
+                } else {
+                    throw error;
+                }
             }
         }
 
