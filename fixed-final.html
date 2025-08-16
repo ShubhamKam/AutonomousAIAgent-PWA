@@ -38,6 +38,10 @@
             --icon-gradient-1: linear-gradient(135deg, #6366F1, #8B5CF6);
             --icon-gradient-2: linear-gradient(135deg, #10B981, #059669);
             --icon-gradient-3: linear-gradient(135deg, #F59E0B, #D97706);
+            
+            /* Enhanced Status Bar Integration */
+            --status-bar-height: 0px; /* Default, will be updated by Cordova plugin */
+            --status-bar-bg: #1A1A1D; /* Matches Commence container color */
         }
 
         * {
@@ -88,7 +92,7 @@
             margin: 0 auto;
         }
 
-        /* Enhanced mobile container */
+        /* Enhanced mobile container with status bar integration */
         .cordova .app-container,
         .mobile-app .app-container {
             height: 100vh;
@@ -97,11 +101,13 @@
             width: 100vw;
             box-shadow: none;
             margin: 0;
-            /* Handle safe areas for notched devices */
-            padding-top: env(safe-area-inset-top, 0);
+            /* Enhanced safe areas with status bar awareness */
+            padding-top: max(var(--status-bar-height), env(safe-area-inset-top, 0));
             padding-bottom: env(safe-area-inset-bottom, 0);
             padding-left: env(safe-area-inset-left, 0);
             padding-right: env(safe-area-inset-right, 0);
+            /* Prevent content from appearing behind status bar */
+            background: var(--status-bar-bg);
         }
 
         /* Auto-detect mobile app and apply styles */
@@ -1464,6 +1470,122 @@
             }, false);
         }
 
+        // 📱 Enhanced Status Bar Integration
+        function setupStatusBar() {
+            if (!window.StatusBar) {
+                console.log('⚠️ StatusBar plugin not available');
+                return;
+            }
+
+            try {
+                console.log('🎨 Configuring status bar for Commence...');
+                
+                // Core status bar configuration
+                StatusBar.overlaysWebView(false); // Don't overlap with content
+                StatusBar.show(); // Ensure status bar is visible
+                
+                // Commence branding colors
+                const statusBarColor = '#1A1A1D'; // Commence container color
+                StatusBar.backgroundColorByHexString(statusBarColor);
+                StatusBar.styleLightContent(); // White text/icons for dark background
+                
+                // Update CSS variables for better integration
+                document.documentElement.style.setProperty('--status-bar-bg', statusBarColor);
+                document.documentElement.style.setProperty('--status-bar-height', '24px'); // Standard Android status bar height
+                
+                // Enhanced mobile experience
+                if (device && device.platform) {
+                    console.log(`📱 Platform: ${device.platform}`);
+                    
+                    if (device.platform === 'Android') {
+                        // Android-specific optimizations
+                        const androidStatusColor = '#1A1A1D';
+                        StatusBar.backgroundColorByHexString(androidStatusColor);
+                        StatusBar.styleLightContent();
+                        
+                        // Update CSS for Android
+                        document.documentElement.style.setProperty('--status-bar-height', '24px');
+                        document.documentElement.style.setProperty('--status-bar-bg', androidStatusColor);
+                        
+                        // Material Design status bar styling for newer Android
+                        if (parseFloat(device.version) >= 6.0) {
+                            console.log(`🤖 Android ${device.version} - Material Design status bar`);
+                            StatusBar.styleDefault();
+                            
+                            // Darker status bar for better contrast on newer Android
+                            const darkStatusColor = '#0A0A0B';
+                            StatusBar.backgroundColorByHexString(darkStatusColor);
+                            document.documentElement.style.setProperty('--status-bar-bg', darkStatusColor);
+                        }
+                    } else if (device.platform === 'iOS') {
+                        // iOS-specific optimizations
+                        StatusBar.styleLightContent(); // White text
+                        console.log('🍎 iOS detected - using light content style');
+                        
+                        // iOS status bar height varies by device
+                        const iosHeight = window.screen.height >= 812 ? '44px' : '20px'; // iPhone X+ vs older
+                        document.documentElement.style.setProperty('--status-bar-height', iosHeight);
+                        
+                        // iOS doesn't support background color changes, so use system default
+                        document.documentElement.style.setProperty('--status-bar-bg', 'transparent');
+                    }
+                }
+                
+                // Handle orientation changes with enhanced status bar refresh
+                window.addEventListener('orientationchange', function() {
+                    setTimeout(() => {
+                        console.log('🔄 Orientation changed - updating status bar');
+                        const currentBg = getComputedStyle(document.documentElement).getPropertyValue('--status-bar-bg').trim() || '#1A1A1D';
+                        StatusBar.backgroundColorByHexString(currentBg);
+                        StatusBar.styleLightContent();
+                        StatusBar.show();
+                    }, 100);
+                });
+                
+                // Handle app resume with comprehensive status bar refresh
+                document.addEventListener('resume', function() {
+                    console.log('▶️ App resumed - refreshing status bar configuration');
+                    setTimeout(() => {
+                        const currentBg = getComputedStyle(document.documentElement).getPropertyValue('--status-bar-bg').trim() || '#1A1A1D';
+                        StatusBar.backgroundColorByHexString(currentBg);
+                        StatusBar.styleLightContent();
+                        StatusBar.show();
+                        StatusBar.overlaysWebView(false); // Ensure no overlay after resume
+                    }, 50);
+                });
+                
+                // Handle app pause to prepare for resume
+                document.addEventListener('pause', function() {
+                    console.log('⏸️ App paused - status bar will be refreshed on resume');
+                });
+                
+                console.log('✅ Status bar configured successfully');
+                
+            } catch (error) {
+                console.error('❌ Status bar configuration failed:', error);
+                // Fallback to basic CSS-only approach
+                document.documentElement.style.setProperty('--status-bar-height', '24px');
+                document.documentElement.style.setProperty('--status-bar-bg', '#1A1A1D');
+            }
+        }
+
+        // 🔧 Status Bar Debug Function (for manual testing)
+        function debugStatusBar() {
+            console.log('🔍 Status Bar Debug Info:');
+            console.log('StatusBar available:', !!window.StatusBar);
+            if (window.StatusBar) {
+                console.log('StatusBar.isVisible:', StatusBar.isVisible);
+            }
+            console.log('CSS --status-bar-height:', getComputedStyle(document.documentElement).getPropertyValue('--status-bar-height'));
+            console.log('CSS --status-bar-bg:', getComputedStyle(document.documentElement).getPropertyValue('--status-bar-bg'));
+            console.log('Device info:', window.device);
+            console.log('Screen dimensions:', { width: window.screen.width, height: window.screen.height });
+            console.log('Viewport dimensions:', { width: window.innerWidth, height: window.innerHeight });
+        }
+        
+        // Make debug function globally available for testing
+        window.debugStatusBar = debugStatusBar;
+
         function initializeApp() {
             // Enhanced mobile detection and optimizations
             if (window.cordova || navigator.userAgent.includes('Android') || navigator.userAgent.includes('iPhone') || window.navigator.standalone) {
@@ -1475,12 +1597,8 @@
                     navigator.splashscreen.hide();
                 }
                 
-                // Enhanced status bar handling
-                if (window.StatusBar) {
-                    StatusBar.styleDefault();
-                    StatusBar.overlaysWebView(false);
-                    StatusBar.backgroundColorByHexString('#1A1A1D');
-                }
+                // Enhanced status bar integration
+                setupStatusBar();
             }
             
             const input = document.getElementById('message-input');
