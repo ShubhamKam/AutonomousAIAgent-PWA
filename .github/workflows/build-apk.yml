@@ -130,10 +130,55 @@ jobs:
       run: |
         echo "📱 Adding Android platform..."
         echo "📁 Working in: $(pwd)"
-        npx cap add android
         
-        echo "📁 Checking android directory:"
-        ls -la android/ || echo "❌ Android directory not created"
+        # Check if android directory already exists
+        if [ -d "android" ]; then
+          echo "✅ Android platform already exists, skipping add step"
+          echo "📁 Existing Android directory:"
+          ls -la android/
+          
+          # Verify gradlew exists and is executable
+          if [ -f "android/gradlew" ]; then
+            echo "✅ Gradlew file found"
+            chmod +x android/gradlew
+          else
+            echo "❌ Gradlew missing, this will cause build issues"
+          fi
+        else
+          echo "📱 Adding new Android platform..."
+          
+          # Ensure we have a clean package.json for Capacitor
+          if [ ! -f "package.json" ]; then
+            echo "📦 Creating package.json..."
+            cat > package.json << 'EOF'
+        {
+          "name": "autonomous-ai-agent",
+          "version": "1.0.0",
+          "scripts": {
+            "build": "echo build complete"
+          },
+          "dependencies": {
+            "@capacitor/android": "^5.0.0",
+            "@capacitor/core": "^5.0.0"
+          },
+          "devDependencies": {
+            "@capacitor/cli": "^5.0.0"
+          }
+        }
+        EOF
+          fi
+          
+          # Install dependencies first
+          echo "📦 Installing dependencies..."
+          npm install --no-package-lock
+          
+          # Add Android platform
+          echo "📱 Adding Android platform..."
+          npx cap add android
+          
+          echo "📁 Android directory created:"
+          ls -la android/
+        fi
         
     - name: Sync project
       working-directory: ${{ env.PROJECT_DIR }}
@@ -163,12 +208,34 @@ jobs:
       run: |
         echo "🔨 Building APK..."
         echo "📁 Working in: $(pwd)"
+        
+        if [ ! -d "android" ]; then
+          echo "❌ Android directory missing, cannot build APK"
+          exit 1
+        fi
+        
         cd android
-        chmod +x ./gradlew
-        ./gradlew assembleDebug --stacktrace
+        
+        # Ensure gradlew is executable
+        if [ -f "./gradlew" ]; then
+          chmod +x ./gradlew
+          echo "✅ Gradlew is ready"
+        else
+          echo "❌ Gradlew file missing"
+          ls -la
+          exit 1
+        fi
+        
+        # Build the APK
+        echo "🔨 Starting APK build..."
+        ./gradlew assembleDebug --stacktrace --info
         
         echo "📱 APK location:"
         find . -name "*.apk" -type f || echo "❌ No APK found"
+        
+        # Show build outputs directory
+        echo "📁 Build outputs:"
+        ls -la app/build/outputs/apk/debug/ || echo "No debug APK directory"
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
