@@ -2,13 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>⚡ Commence - AI Workspace</title>
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -53,36 +48,12 @@
             min-height: 100vh;
             margin: 0;
             padding: 0;
-            /* Cordova/Mobile app optimizations */
-            -webkit-touch-callout: none;
-            -webkit-text-size-adjust: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: rgba(0,0,0,0);
-            /* Remove centering for mobile app */
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        /* Cordova app container */
-        body.cordova {
-            display: block;
-            padding: 0;
-        }
-
-        .cordova .app-container {
-            height: 100vh;
-            border-radius: 0;
-            max-width: none;
-            width: 100vw;
-            box-shadow: none;
-            margin: 0;
-            /* Handle safe areas for notched devices */
-            padding-top: env(safe-area-inset-top, 0);
-            padding-bottom: env(safe-area-inset-bottom, 0);
-            padding-left: env(safe-area-inset-left, 0);
-            padding-right: env(safe-area-inset-right, 0);
-        }
-
-        /* Default web styling */
         .app-container {
             width: 100%;
             max-width: 400px;
@@ -94,28 +65,9 @@
             overflow: hidden;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             position: relative;
-            margin: 20px auto;
         }
 
-        /* Auto-detect mobile app and apply styles */
-        @media (display-mode: standalone) {
-            body {
-                display: block;
-                padding: 0;
-            }
-            
-            .app-container {
-                height: 100vh;
-                border-radius: 0;
-                max-width: none;
-                width: 100vw;
-                box-shadow: none;
-                margin: 0;
-            }
-        }
-
-
-        /* Header - Enhanced for mobile */
+        /* Header */
         .header {
             padding: 12px 16px;
             background: var(--commence-container);
@@ -123,16 +75,6 @@
             flex-shrink: 0;
             min-height: 56px;
             box-sizing: border-box;
-            position: relative;
-            z-index: 1000;
-            /* Ensure header is always visible */
-            display: flex;
-            align-items: center;
-            width: 100%;
-            /* Mobile app safe area handling */
-            padding-top: max(12px, env(safe-area-inset-top, 0));
-            padding-left: max(16px, env(safe-area-inset-left, 0));
-            padding-right: max(16px, env(safe-area-inset-right, 0));
         }
 
         .header-content {
@@ -1437,35 +1379,6 @@
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-        });
-
-        // Cordova device ready event
-        if (window.cordova) {
-            document.addEventListener('deviceready', function() {
-                console.log('📱 Cordova device ready');
-                initializeApp();
-            }, false);
-        }
-
-        function initializeApp() {
-            // Detect Cordova and apply mobile optimizations
-            if (window.cordova || navigator.userAgent.includes('Android') || navigator.userAgent.includes('iPhone')) {
-                document.body.classList.add('cordova');
-                console.log('📱 Mobile app detected - applying Cordova optimizations');
-                
-                // Hide splash screen if available
-                if (navigator.splashscreen) {
-                    navigator.splashscreen.hide();
-                }
-                
-                // Set status bar style if available
-                if (window.StatusBar) {
-                    StatusBar.styleDefault();
-                    StatusBar.overlaysWebView(false);
-                }
-            }
-            
             const input = document.getElementById('message-input');
             const sendBtn = document.getElementById('send-btn');
             
@@ -1477,7 +1390,7 @@
 
             // Load saved data
             loadData();
-        }
+        });
 
         function loadData() {
             try {

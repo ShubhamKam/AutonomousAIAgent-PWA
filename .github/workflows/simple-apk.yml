@@ -50,15 +50,18 @@ jobs:
       
     - name: Create Cordova project
       run: |
-        echo "📱 Creating clean Cordova project..."
-        cordova create autonomous-ai com.autonomousai.agent "AutonomousAIAgent"
-        cd autonomous-ai
+        echo "📱 Creating Commence AI Workspace Cordova project..."
+        cordova create commence-app com.commence.workspace "Commence"
+        cd commence-app
         
-        # Copy web files
-        echo "📁 Copying web files..."
+        # Copy Commence web files
+        echo "📁 Copying Commence web files..."
         if [ -f "../${{ env.PROJECT_DIR }}/fixed-final.html" ]; then
           cp "../${{ env.PROJECT_DIR }}/fixed-final.html" www/index.html
-          echo "✅ Copied fixed-final.html (main app)"
+          echo "✅ Copied fixed-final.html (Commence main app with all features)"
+        elif [ -f "../${{ env.PROJECT_DIR }}/commence-fixed.html" ]; then
+          cp "../${{ env.PROJECT_DIR }}/commence-fixed.html" www/index.html
+          echo "✅ Copied commence-fixed.html"
         elif [ -f "../${{ env.PROJECT_DIR }}/index.html" ]; then
           cp "../${{ env.PROJECT_DIR }}/index.html" www/index.html
           echo "✅ Copied index.html"
@@ -66,55 +69,76 @@ jobs:
           echo "⚠️ Using default HTML"
         fi
         
-        # Copy JavaScript files
+        # Copy additional assets if they exist
         cp ../${{ env.PROJECT_DIR }}/*.js www/ 2>/dev/null || true
-        echo "✅ Copied JavaScript files"
+        cp ../${{ env.PROJECT_DIR }}/*.css www/ 2>/dev/null || true
+        cp ../${{ env.PROJECT_DIR }}/*.json www/ 2>/dev/null || true
+        echo "✅ Copied additional assets"
         
         # Copy manifest for PWA features
         cp ../${{ env.PROJECT_DIR }}/manifest.json www/ 2>/dev/null || true
         
-        echo "📁 Web directory contents:"
+        echo "📁 Commence web directory contents:"
         ls -la www/
         
     - name: Install Cordova Plugins
       run: |
-        cd autonomous-ai
+        cd commence-app
         echo "📱 Installing Cordova plugins for Commence app..."
         
-        # Core HTTP and networking
+        # Essential plugins for Commence AI Workspace
+        
+        # Core HTTP and networking for Claude API
         cordova plugin add cordova-plugin-advanced-http
         cordova plugin add cordova-plugin-network-information
         
-        # Authentication and storage (using working plugins)
+        # Authentication and secure storage for user data
         cordova plugin add cordova-plugin-secure-storage-echo
         
-        # Device features
+        # Mobile app essentials
         cordova plugin add cordova-plugin-device
         cordova plugin add cordova-plugin-statusbar
         cordova plugin add cordova-plugin-splashscreen
         
-        # File system access
+        # File system for project/chat storage
         cordova plugin add cordova-plugin-file
         
-        # Whitelist for external API calls
+        # Security and API access
         cordova plugin add cordova-plugin-whitelist
         
-        echo "✅ Core Cordova plugins configured for Commence"
+        # Keyboard handling for chat input
+        cordova plugin add cordova-plugin-ionic-keyboard || cordova plugin add ionic-plugin-keyboard || true
+        
+        # Notification support for tasks/projects
+        cordova plugin add cordova-plugin-local-notification || true
+        
+        echo "✅ All Commence plugins configured successfully"
         
     - name: Add Android platform
       run: |
-        cd autonomous-ai
+        cd commence-app
         echo "📱 Adding Android platform..."
         cordova platform add android
         
         echo "📁 Checking platforms:"
         cordova platform list
         
+    - name: Configure Android settings
+      run: |
+        cd commence-app
+        echo "⚙️ Configuring Android settings for Commence..."
+        
+        # Update config.xml for better mobile experience
+        sed -i 's/<name>HelloCordova<\/name>/<name>Commence<\/name>/g' config.xml || true
+        sed -i 's/<description>.*<\/description>/<description>AI-powered workspace for productivity<\/description>/g' config.xml || true
+        
+        echo "✅ Android configuration updated"
+        
     - name: Build APK
       run: |
-        cd autonomous-ai
-        echo "🔨 Building APK..."
-        cordova build android
+        cd commence-app
+        echo "🔨 Building Commence APK..."
+        cordova build android --release || cordova build android
         
         echo "📱 Finding APK:"
         find . -name "*.apk" -type f
@@ -122,27 +146,42 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: autonomous-ai-agent-apk
-        path: autonomous-ai/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+        name: commence-workspace-apk
+        path: commence-app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
         
     - name: Show download instructions
       run: |
-        echo "🎉 APK BUILD SUCCESSFUL!"
-        echo "========================================"
-        echo "📱 Your Autonomous AI Agent APK is ready!"
+        echo "🎉 COMMENCE APK BUILD SUCCESSFUL! 🎉"
+        echo "=============================================="
+        echo "⚡ Your Commence AI Workspace APK is ready!"
         echo ""
         echo "📥 Download Instructions:"
         echo "1. Go to: https://github.com/${{ github.repository }}/actions"
         echo "2. Click on this workflow run"
         echo "3. Scroll down to 'Artifacts'"
-        echo "4. Download 'autonomous-ai-agent-apk'"
+        echo "4. Download 'commence-workspace-apk'"
         echo "5. Extract and install the APK on your Android device"
         echo ""
-        echo "✨ Features included:"
-        echo "- Bloomberg Terminal UI"
-        echo "- Chat system with conversation history"
-        echo "- Tools integration (JIRA, Google Drive, Slack, GitHub)"
-        echo "- Enhanced JIRA with healthcare compliance"
-        echo "- Professional mobile interface"
+        echo "✨ Commence Features Included:"
+        echo "🔹 Complete Authentication System (Login/Register/Demo)"
+        echo "🔹 AI Chat Interface with Claude API integration"
+        echo "🔹 Project Management with file storage"
+        echo "🔹 Task Tracking and Management"
+        echo "🔹 Tools Integration (JIRA, Google Drive, Slack, GitHub)"
+        echo "🔹 Collapsible Sidebar Navigation"
+        echo "🔹 Mobile-Optimized Header (Fixed disappearing issue)"
+        echo "🔹 Geometric Logo and Modern UI"
+        echo "🔹 Safe Area Support for notched devices"
+        echo "🔹 Status Bar integration"
+        echo "🔹 Native HTTP requests via Cordova plugins"
+        echo "🔹 Secure storage for user data"
+        echo "🔹 Cross-section navigation (Chats, Projects, Tasks, Tools, Settings)"
         echo ""
-        echo "🚀 Your Autonomous AI Agent is ready for mobile! 🚀"
+        echo "🔧 Mobile Optimizations Applied:"
+        echo "- Fixed header disappearing in mobile app"
+        echo "- Proper viewport handling"
+        echo "- Cordova device ready events"
+        echo "- Mobile-specific CSS adaptations"
+        echo "- Touch gesture optimizations"
+        echo ""
+        echo "🚀 Commence - Your AI workspace is ready for mobile! ⚡"

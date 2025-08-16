@@ -1,79 +1,26 @@
 {
-  "name": "Autonomous AI Agent",
-  "short_name": "AI Agent",
-  "description": "Autonomous AI Agent - Bridging the gap between mind and action with 100% autonomous capabilities",
+  "name": "Commence - AI Workspace",
+  "short_name": "Commence",
+  "description": "AI-powered workspace for productivity with chat, projects, tasks, and tools",
+  "version": "1.0.0",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#007AFF",
-  "orientation": "portrait-primary",
-  "scope": "/",
-  "lang": "en",
-  "categories": ["productivity", "utilities", "lifestyle"],
+  "orientation": "portrait",
+  "background_color": "#0A0A0B",
+  "theme_color": "#6366F1",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23007AFF' rx='20'/><text x='96' y='140' font-size='120' text-anchor='middle' fill='white'>🤖</text></svg>",
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl80Ml8xKSIvPgo8cGF0aCBkPSJNOTYgNjBMMTIwIDEwOEg3Mkw5NiA2MFoiIGZpbGw9IndoaXRlIi8+CjxjaXJjbGUgY3g9IjEzMiIgY3k9IjEzMiIgcj0iMTYiIGZpbGw9IiM2MzY2RjEiLz4KPGRFRZ4KPGF5aWVudEdyYWRpZW50IGlkPSJncmFkaWVudDBfbGluZWFyXzQyXzEiIHgxPSIwIiB5MT0iMCIgeDI9IjE5MiIgeTI9IjE5MiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNjM2NkYxIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzhCNUNGNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/svg+xml"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23007AFF' rx='50'/><text x='256' y='380' font-size='320' text-anchor='middle' fill='white'>🤖</text></svg>",
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl80Ml8xKSIvPgo8cGF0aCBkPSJNMjU2IDE2MEwzMjAgMjg4SDE5MkwyNTYgMTYwWiIgZmlsbD0id2hpdGUiLz4KPGNpcmNsZSBjeD0iMzUyIiBjeT0iMzUyIiByPSI0MiIgZmlsbD0iIzYzNjZGMSIvPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJncmFkaWVudDBfbGluZWFyXzQyXzEiIHgxPSIwIiB5MT0iMCIgeDI9IjUxMiIgeTI9IjUxMiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjNjM2NkYxIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzhCNUNGNiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/svg+xml"
     }
   ],
-  "screenshots": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 800'><rect width='400' height='800' fill='%23f5f5f5'/><rect width='400' height='80' fill='%23007AFF'/><text x='20' y='50' font-size='20' fill='white' font-family='system-ui'>🤖 Autonomous AI Agent</text><rect x='20' y='100' width='360' height='600' fill='white' rx='10'/><text x='200' y='400' text-anchor='middle' font-size='16' fill='%23666'>Chat with your AI agent</text></svg>",
-      "sizes": "400x800",
-      "type": "image/svg+xml",
-      "form_factor": "narrow",
-      "label": "Chat interface on mobile"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "New Chat",
-      "short_name": "Chat",
-      "description": "Start a new conversation with your AI agent",
-      "url": "/?action=new-chat",
-      "icons": [
-        {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Settings",
-      "short_name": "Settings",
-      "description": "Configure your AI agent",
-      "url": "/?action=settings",
-      "icons": [
-        {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ],
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "protocol_handlers": [
-    {
-      "protocol": "web+aiagent",
-      "url": "/?action=%s"
-    }
-  ],
-  "share_target": {
-    "action": "/",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  }
+  "categories": ["productivity", "business", "utilities"],
+  "lang": "en",
+  "dir": "ltr"
 }
