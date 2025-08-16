@@ -253,6 +253,34 @@ jobs:
         
         cd android
         
+        # Check Gradle wrapper structure
+        echo "🔍 Checking Gradle wrapper structure:"
+        ls -la gradle/wrapper/ || echo "No wrapper directory"
+        
+        # Fix Gradle wrapper if missing
+        if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
+          echo "🔧 Fixing Gradle wrapper..."
+          
+          # Create wrapper directory
+          mkdir -p gradle/wrapper
+          
+          # Download Gradle wrapper jar
+          curl -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.4.0/gradle/wrapper/gradle-wrapper.jar
+          
+          # Create gradle-wrapper.properties
+          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
+        distributionBase=GRADLE_USER_HOME
+        distributionPath=wrapper/dists
+        distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip
+        networkTimeout=10000
+        validateDistributionUrl=true
+        zipStoreBase=GRADLE_USER_HOME
+        zipStorePath=wrapper/dists
+        EOF
+          
+          echo "✅ Gradle wrapper fixed"
+        fi
+        
         # Ensure gradlew is executable
         if [ -f "./gradlew" ]; then
           chmod +x ./gradlew
@@ -263,9 +291,22 @@ jobs:
           exit 1
         fi
         
-        # Build the APK
-        echo "🔨 Starting APK build..."
-        ./gradlew assembleDebug --stacktrace --info
+        # Verify wrapper works
+        echo "🔍 Testing Gradle wrapper..."
+        ./gradlew --version || {
+          echo "❌ Gradle wrapper still not working, trying direct gradle..."
+          gradle --version && {
+            echo "🔧 Using system gradle instead..."
+            gradle assembleDebug
+          } || {
+            echo "❌ Both gradlew and gradle failed"
+            exit 1
+          }
+        } && {
+          # Build the APK with gradlew
+          echo "🔨 Starting APK build with gradlew..."
+          ./gradlew assembleDebug --stacktrace --info
+        }
         
         echo "📱 APK location:"
         find . -name "*.apk" -type f || echo "❌ No APK found"
