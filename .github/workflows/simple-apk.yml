@@ -132,22 +132,84 @@ jobs:
         sed -i 's/<name>HelloCordova<\/name>/<name>Commence<\/name>/g' config.xml || true
         sed -i 's/<description>.*<\/description>/<description>AI-powered workspace for productivity<\/description>/g' config.xml || true
         
-        echo "✅ Android configuration updated"
+        # Force APK build instead of AAB
+        echo "📱 Configuring to build APK..."
+        mkdir -p platforms/android/app/build/outputs/apk/debug/
+        
+        # Add gradle configuration to force APK
+        echo "android.bundle.enableUncompressedNativeLibs=false" >> platforms/android/gradle.properties || true
+        echo "android.bundle.enableUncompressedNativeLibs=false" >> platforms/android/app/gradle.properties || true
+        
+        echo "✅ Android configuration updated for APK build"
         
     - name: Build APK
       run: |
         cd commence-app
         echo "🔨 Building Commence APK..."
-        cordova build android --release || cordova build android
         
-        echo "📱 Finding APK:"
+        # Build debug APK specifically (not AAB)
+        cordova build android --debug --gradleArg="assembleDebug"
+        
+        # If debug fails, try different approaches
+        if [ ! -f "platforms/android/app/build/outputs/apk/debug/app-debug.apk" ]; then
+          echo "🔄 Debug APK not found, trying alternative build..."
+          
+          # Try building with specific gradle task
+          cd platforms/android
+          ./gradlew assembleDebug || true
+          cd ../..
+          
+          # Try standard build as fallback
+          cordova build android || true
+        fi
+        
+        echo "📱 Finding built files:"
         find . -name "*.apk" -type f
+        find . -name "*.aab" -type f
         
+        echo "📁 Checking build directories:"
+        ls -la platforms/android/app/build/outputs/ || true
+        ls -la platforms/android/app/build/outputs/apk/ || true
+        ls -la platforms/android/app/build/outputs/apk/debug/ || true
+        ls -la platforms/android/app/build/outputs/bundle/ || true
+        
+    - name: Find and Upload APK
+      run: |
+        cd commence-app
+        echo "🔍 Locating APK files..."
+        
+        # Find the actual APK file
+        APK_PATH=""
+        if [ -f "platforms/android/app/build/outputs/apk/debug/app-debug.apk" ]; then
+          APK_PATH="platforms/android/app/build/outputs/apk/debug/app-debug.apk"
+          echo "✅ Found debug APK: $APK_PATH"
+        elif [ -f "platforms/android/app/build/outputs/apk/release/app-release.apk" ]; then
+          APK_PATH="platforms/android/app/build/outputs/apk/release/app-release.apk"
+          echo "✅ Found release APK: $APK_PATH"
+        else
+          echo "❌ No APK found, checking for AAB..."
+          if [ -f "platforms/android/app/build/outputs/bundle/release/app-release.aab" ]; then
+            echo "📦 Found AAB file: platforms/android/app/build/outputs/bundle/release/app-release.aab"
+            echo "⚠️  AAB files need to be converted to APK for installation"
+          fi
+          echo "🔍 All files in build outputs:"
+          find platforms/android/app/build/outputs/ -name "*.apk" -o -name "*.aab" || true
+          exit 1
+        fi
+        
+        # Copy APK to a standard location for upload
+        mkdir -p apk-output
+        cp "$APK_PATH" apk-output/commence-app.apk
+        echo "✅ APK ready for upload: apk-output/commence-app.apk"
+        
+        # Show file info
+        ls -la apk-output/commence-app.apk
+
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: commence-workspace-apk
-        path: commence-app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+        path: commence-app/apk-output/commence-app.apk
         
     - name: Show download instructions
       run: |
