@@ -1,14 +1,9 @@
-name: Cordova APK Build
+name: Build APK
 
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
   workflow_dispatch:
-  schedule:
-    - cron: '*/10 * * * *'  # Run every 10 minutes as backup
 
 jobs:
   build:
@@ -55,7 +50,7 @@ jobs:
       
     - name: Create Cordova project
       run: |
-        echo "📱 Creating Cordova project..."
+        echo "📱 Creating clean Cordova project..."
         cordova create autonomous-ai com.autonomousai.agent "AutonomousAIAgent"
         cd autonomous-ai
         
@@ -63,7 +58,7 @@ jobs:
         echo "📁 Copying web files..."
         if [ -f "../${{ env.PROJECT_DIR }}/fixed-final.html" ]; then
           cp "../${{ env.PROJECT_DIR }}/fixed-final.html" www/index.html
-          echo "✅ Copied fixed-final.html"
+          echo "✅ Copied fixed-final.html (main app)"
         elif [ -f "../${{ env.PROJECT_DIR }}/index.html" ]; then
           cp "../${{ env.PROJECT_DIR }}/index.html" www/index.html
           echo "✅ Copied index.html"
@@ -71,8 +66,12 @@ jobs:
           echo "⚠️ Using default HTML"
         fi
         
-        # Copy additional files
+        # Copy JavaScript files
         cp ../${{ env.PROJECT_DIR }}/*.js www/ 2>/dev/null || true
+        echo "✅ Copied JavaScript files"
+        
+        # Copy manifest for PWA features
+        cp ../${{ env.PROJECT_DIR }}/manifest.json www/ 2>/dev/null || true
         
         echo "📁 Web directory contents:"
         ls -la www/
@@ -98,16 +97,28 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: autonomous-ai-apk
+        name: autonomous-ai-agent-apk
         path: autonomous-ai/platforms/android/app/build/outputs/apk/debug/app-debug.apk
         
     - name: Create Release
       if: github.event_name == 'push'
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: cordova-v${{ github.run_number }}
-        name: Cordova APK v${{ github.run_number }}
+        tag_name: v${{ github.run_number }}
+        name: Autonomous AI Agent v${{ github.run_number }}
+        body: |
+          🤖 **Autonomous AI Agent APK**
+          
+          Professional AI Agent with Bloomberg Terminal UI
+          
+          **Features:**
+          - Chat system with conversation history
+          - Tools integration (JIRA, Google Drive, Slack, GitHub)
+          - Enhanced JIRA with healthcare compliance
+          - Professional mobile interface
+          
+          Built with Cordova for maximum compatibility.
         files: autonomous-ai/platforms/android/app/build/outputs/apk/debug/app-debug.apk
-        generate_release_notes: true
+        generate_release_notes: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
