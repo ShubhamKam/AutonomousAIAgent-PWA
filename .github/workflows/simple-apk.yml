@@ -85,24 +85,21 @@ jobs:
         cordova plugin add cordova-plugin-advanced-http
         cordova plugin add cordova-plugin-network-information
         
-        # Authentication and storage
-        cordova plugin add cordova-plugin-secure-storage
-        cordova plugin add cordova-plugin-keychain
-        cordova plugin add cordova-plugin-fingerprint-aio
+        # Authentication and storage (using working plugins)
+        cordova plugin add cordova-plugin-secure-storage-echo
         
         # Device features
         cordova plugin add cordova-plugin-device
         cordova plugin add cordova-plugin-statusbar
         cordova plugin add cordova-plugin-splashscreen
         
-        # File system and camera (for future features)
+        # File system access
         cordova plugin add cordova-plugin-file
-        cordova plugin add cordova-plugin-camera
         
-        # Notifications
-        cordova plugin add cordova-plugin-local-notification
+        # Whitelist for external API calls
+        cordova plugin add cordova-plugin-whitelist
         
-        echo "✅ All Cordova plugins configured for Commence"
+        echo "✅ Core Cordova plugins configured for Commence"
         
     - name: Add Android platform
       run: |
