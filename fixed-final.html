@@ -46,6 +46,8 @@
             background-color: var(--commence-bg);
             color: var(--commence-white);
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -62,6 +64,7 @@
             flex-direction: column;
             overflow: hidden;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
         }
 
         /* Glassmorphism Effect */
@@ -79,36 +82,45 @@
 
         /* Header */
         .header {
-            padding: 20px;
-            background: var(--manus-container);
-            border-bottom: 1px solid var(--manus-surface);
+            padding: 12px 16px;
+            background: var(--commence-container);
+            border-bottom: 1px solid var(--commence-surface);
+            flex-shrink: 0;
+            min-height: 56px;
+            box-sizing: border-box;
         }
 
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 20px;
+            gap: 8px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--commence-white);
+            flex-shrink: 0;
+            min-width: 0;
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             background: var(--icon-gradient-1);
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .logo-icon::before {
@@ -134,13 +146,15 @@
 
         .header-actions {
             display: flex;
-            gap: 12px;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
         }
 
         .icon-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             background: var(--commence-card);
             border: none;
             color: var(--commence-white);
@@ -149,6 +163,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            flex-shrink: 0;
         }
 
         .icon-btn:hover {
@@ -164,7 +179,8 @@
         .nav-bar {
             background: var(--commence-container);
             border-bottom: 1px solid var(--commence-surface);
-            padding: 12px 20px;
+            padding: 8px 16px;
+            flex-shrink: 0;
         }
 
         .nav-container {
@@ -182,18 +198,19 @@
         .nav-btn {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
-            border-radius: 12px;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 10px;
             border: none;
             background: var(--commence-card);
             color: var(--commence-gray);
             font-weight: 500;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.3s ease;
             white-space: nowrap;
             min-width: fit-content;
+            flex-shrink: 0;
         }
 
         .nav-btn.active {
@@ -630,12 +647,76 @@
         @media (max-width: 480px) {
             body {
                 padding: 0;
+                align-items: stretch;
+                justify-content: stretch;
             }
             
             .app-container {
                 height: 100vh;
                 border-radius: 0;
                 max-width: none;
+                width: 100vw;
+                box-shadow: none;
+            }
+
+            .header {
+                padding: 12px 16px;
+                min-height: 52px;
+            }
+
+            .logo {
+                font-size: 16px;
+                gap: 6px;
+            }
+
+            .logo-icon {
+                width: 24px;
+                height: 24px;
+                border-radius: 5px;
+            }
+
+            .icon-btn {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+            }
+
+            .header-actions {
+                gap: 6px;
+            }
+
+            .user-profile {
+                font-size: 13px;
+                gap: 6px;
+            }
+
+            .user-avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+
+            .nav-bar {
+                padding: 6px 12px;
+            }
+
+            .nav-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+                gap: 4px;
+            }
+
+            .nav-btn .material-icons {
+                font-size: 16px;
+            }
+        }
+
+        /* Safe area handling for notched devices */
+        @supports (padding: max(0px)) {
+            .header {
+                padding-top: max(12px, env(safe-area-inset-top));
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
             }
         }
 
