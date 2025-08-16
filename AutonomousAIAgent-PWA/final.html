@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🤖 Autonomous AI Agent - Final Version</title>
+    
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .header {
+            background: #007AFF;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .setup {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .setup input {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .setup button {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #007AFF;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #007AFF;
+        }
+
+        .status {
+            padding: 8px 20px;
+            background: #28a745;
+            color: white;
+            text-align: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 0; /* Important for flex scrolling */
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .user {
+            background: #007AFF;
+            color: white;
+            margin-left: auto;
+        }
+
+        .agent {
+            background: #f0f0f0;
+            color: black;
+        }
+
+        .typing {
+            font-style: italic;
+            color: #666;
+        }
+
+        .input-area {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-row input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            background: #f9f9f9;
+        }
+
+        .input-row button {
+            padding: 12px 20px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .input-row button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .saved-indicator {
+            font-size: 10px;
+            color: #28a745;
+            margin-top: 5px;
+        }
+
+        /* Mobile keyboard fixes */
+        @media (max-width: 768px) {
+            body {
+                /* Prevent viewport resize on keyboard open */
+                height: 100vh;
+                height: 100dvh;
+            }
+            
+            .container {
+                height: 100vh;
+                height: 100dvh;
+            }
+            
+            .input-row input {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+
+        /* Handle keyboard on mobile */
+        @media screen and (max-height: 500px) {
+            .messages {
+                padding: 10px 20px;
+            }
+            
+            .input-area {
+                padding: 10px 20px;
+            }
+        }
+
+        /* iOS Safari specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .container {
+                height: -webkit-fill-available;
+            }
+            
+            body {
+                height: -webkit-fill-available;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Setup Screen -->
+        <div id="setup-screen">
+            <div class="header">
+                <h1>🤖 Autonomous AI Agent</h1>
+                <p>Real Claude API Integration</p>
+            </div>
+            <div class="setup">
+                <p>Enter your Anthropic API key:</p>
+                <input type="password" id="api-key" placeholder="sk-ant-api03-..." />
+                <div id="saved-key" class="saved-indicator hidden">✓ API key saved</div>
+                <br>
+                <button class="btn-primary" onclick="connectAPI()">Connect to Claude API</button>
+                <button class="btn-secondary" onclick="startDemo()">Use Demo Mode</button>
+                <p style="font-size: 12px; color: #666; margin-top: 20px;">
+                    Get your API key from console.anthropic.com<br>
+                    API key will be saved for future sessions
+                </p>
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div id="chat-screen" class="hidden">
+            <div class="header">
+                <h1>🤖 Autonomous AI Agent</h1>
+                <div id="connection-status">Connected to Claude API</div>
+            </div>
+            <div class="status" id="status">🟢 Ready to chat</div>
+            <div id="messages" class="messages">
+                <!-- Messages will appear here -->
+            </div>
+            <div class="input-area">
+                <div class="input-row">
+                    <input type="text" id="message-input" placeholder="Type your message..." />
+                    <button id="send-btn" onclick="sendMessage()" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiKey = '';
+        let isDemo = false;
+        let isTyping = false;
+        let messages = [];
+
+        // Load saved data on page load
+        window.addEventListener('load', () => {
+            loadSavedData();
+        });
+
+        function loadSavedData() {
+            try {
+                // Load API key
+                const savedApiKey = localStorage.getItem('ai_agent_api_key');
+                if (savedApiKey) {
+                    document.getElementById('api-key').value = savedApiKey;
+                    document.getElementById('saved-key').classList.remove('hidden');
+                }
+
+                // Load messages
+                const savedMessages = localStorage.getItem('ai_agent_messages');
+                if (savedMessages) {
+                    messages = JSON.parse(savedMessages);
+                }
+            } catch (error) {
+                console.log('No saved data found');
+            }
+        }
+
+        function saveData() {
+            try {
+                if (apiKey) {
+                    localStorage.setItem('ai_agent_api_key', apiKey);
+                }
+                localStorage.setItem('ai_agent_messages', JSON.stringify(messages));
+                localStorage.setItem('ai_agent_mode', isDemo ? 'demo' : 'api');
+            } catch (error) {
+                console.error('Failed to save data:', error);
+            }
+        }
+
+        function connectAPI() {
+            const inputKey = document.getElementById('api-key').value.trim();
+            if (!inputKey) {
+                alert('Please enter your API key');
+                return;
+            }
+            if (!inputKey.startsWith('sk-ant-api03-')) {
+                alert('Please enter a valid Anthropic API key');
+                return;
+            }
+            apiKey = inputKey;
+            isDemo = false;
+            saveData();
+            showChat();
+        }
+
+        function startDemo() {
+            isDemo = true;
+            apiKey = '';
+            saveData();
+            showChat();
+        }
+
+        function showChat() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('chat-screen').classList.remove('hidden');
+            
+            const status = document.getElementById('connection-status');
+            const statusBar = document.getElementById('status');
+            
+            if (isDemo) {
+                status.textContent = 'Demo Mode - Offline';
+                statusBar.textContent = '📱 Demo Mode Active';
+                statusBar.style.background = '#17a2b8';
+            } else {
+                status.textContent = 'Connected to Claude API';
+                statusBar.textContent = '🟢 Connected to Claude API';
+                statusBar.style.background = '#28a745';
+            }
+            
+            // Restore previous messages or add welcome
+            if (messages.length > 0) {
+                restoreMessages();
+            } else {
+                addMessage('agent', getWelcomeMessage());
+            }
+            
+            // Focus input and handle mobile keyboard
+            setTimeout(() => {
+                const input = document.getElementById('message-input');
+                input.focus();
+                
+                // Handle mobile keyboard events
+                input.addEventListener('focus', handleKeyboardOpen);
+                input.addEventListener('blur', handleKeyboardClose);
+            }, 100);
+        }
+
+        function handleKeyboardOpen() {
+            // Scroll to bottom when keyboard opens
+            setTimeout(() => {
+                const messages = document.getElementById('messages');
+                messages.scrollTop = messages.scrollHeight;
+            }, 300);
+        }
+
+        function handleKeyboardClose() {
+            // Reset any keyboard-related adjustments
+            setTimeout(() => {
+                const messages = document.getElementById('messages');
+                messages.scrollTop = messages.scrollHeight;
+            }, 100);
+        }
+
+        function restoreMessages() {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.innerHTML = '';
+            
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.sender}`;
+                messageDiv.textContent = msg.text;
+                messagesContainer.appendChild(messageDiv);
+            });
+            
+            scrollToBottom();
+        }
+
+        function getWelcomeMessage() {
+            if (isDemo) {
+                return "Hello! I'm your Autonomous AI Agent in demo mode. Your conversations are saved locally. How can I help you today?";
+            } else {
+                return "Hello! I'm your Autonomous AI Agent, connected to Claude API. Your API key and conversations are saved for future sessions. What would you like to accomplish?";
+            }
+        }
+
+        function addMessage(sender, text) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.textContent = text;
+            messagesContainer.appendChild(messageDiv);
+            
+            // Save to memory and storage
+            messages.push({ sender, text, timestamp: new Date().toISOString() });
+            saveData();
+            
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('messages');
+            setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 50);
+        }
+
+        function showTyping() {
+            if (isTyping) return;
+            isTyping = true;
+            const messagesContainer = document.getElementById('messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'message agent typing';
+            typingDiv.textContent = isDemo ? '🤖 Demo agent thinking...' : '🤖 Claude AI processing...';
+            messagesContainer.appendChild(typingDiv);
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            isTyping = false;
+            const typing = document.getElementById('typing-indicator');
+            if (typing) {
+                typing.remove();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+            
+            if (!text || isTyping) return;
+            
+            addMessage('user', text);
+            input.value = '';
+            updateSendButton();
+            
+            showTyping();
+            
+            try {
+                let response;
+                if (isDemo) {
+                    response = await getDemoResponse(text);
+                } else {
+                    response = await getClaudeResponse(text);
+                }
+                
+                hideTyping();
+                addMessage('agent', response);
+                
+            } catch (error) {
+                hideTyping();
+                addMessage('agent', `Error: ${error.message}`);
+                console.error('Chat error:', error);
+            }
+            
+            // Keep input focused on mobile
+            setTimeout(() => {
+                input.focus();
+            }, 100);
+        }
+
+        async function getDemoResponse(text) {
+            await new Promise(r => setTimeout(r, 1000 + Math.random() * 1500));
+            
+            const responses = [
+                `I understand your request: "${text}". As your autonomous AI agent, I'm analyzing this and preparing a comprehensive approach with full contextual awareness.`,
+                `Processing: "${text}". My autonomous systems are engaged to provide you with strategic insights and actionable solutions.`,
+                `Analyzing: "${text}". I'm working independently to bridge your ideas into concrete, actionable results through autonomous operation.`
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        async function getClaudeResponse(text) {
+            const response = await fetch('/api/anthropic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    apiKey: apiKey,
+                    message: text,
+                    systemPrompt: 'You are an autonomous AI agent designed to bridge the gap between mind and action. You have 100% autonomous capabilities. Be helpful, clear, actionable, and demonstrate autonomous thinking in your responses.'
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || `HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.content[0].text;
+        }
+
+        function updateSendButton() {
+            const input = document.getElementById('message-input');
+            const button = document.getElementById('send-btn');
+            button.disabled = !input.value.trim() || isTyping;
+        }
+
+        function clearData() {
+            if (confirm('Clear all saved data including API key and messages?')) {
+                localStorage.clear();
+                messages = [];
+                location.reload();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('message-input').addEventListener('input', updateSendButton);
+        document.getElementById('message-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.getElementById('api-key').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                connectAPI();
+            }
+        });
+
+        document.getElementById('api-key').addEventListener('input', () => {
+            const savedIndicator = document.getElementById('saved-key');
+            if (document.getElementById('api-key').value.trim()) {
+                savedIndicator.classList.add('hidden');
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                if (confirm('Clear all messages?')) {
+                    messages = [];
+                    document.getElementById('messages').innerHTML = '';
+                    addMessage('agent', getWelcomeMessage());
+                }
+            }
+            
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                clearData();
+            }
+        });
+
+        // Handle mobile viewport changes
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                scrollToBottom();
+            }, 100);
+        });
+
+        // Handle page visibility (save data when leaving)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                saveData();
+            }
+        });
+
+        // Save data before page unload
+        window.addEventListener('beforeunload', () => {
+            saveData();
+        });
+    </script>
+</body>
+</html>

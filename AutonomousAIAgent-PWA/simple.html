@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Autonomous AI Agent - Simple UI</title>
+    
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #007AFF;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        .setup {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .setup input {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .setup button {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #007AFF;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #007AFF;
+        }
+
+        .messages {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border-bottom: 1px solid #eee;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+
+        .user {
+            background: #007AFF;
+            color: white;
+            margin-left: auto;
+        }
+
+        .agent {
+            background: #f0f0f0;
+            color: black;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .input-row input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .input-row button {
+            padding: 12px 20px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .input-row button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status {
+            padding: 8px 20px;
+            background: #28a745;
+            color: white;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .typing {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Setup Screen -->
+        <div id="setup-screen">
+            <div class="header">
+                <h1>🤖 Autonomous AI Agent</h1>
+                <p>Real Claude API Integration</p>
+            </div>
+            <div class="setup">
+                <p>Enter your Anthropic API key:</p>
+                <input type="password" id="api-key" placeholder="sk-ant-api03-..." />
+                <br>
+                <button class="btn-primary" onclick="connectAPI()">Connect to Claude API</button>
+                <button class="btn-secondary" onclick="startDemo()">Use Demo Mode</button>
+                <p style="font-size: 12px; color: #666; margin-top: 20px;">
+                    Get your API key from console.anthropic.com
+                </p>
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div id="chat-screen" class="hidden">
+            <div class="header">
+                <h1>🤖 Autonomous AI Agent</h1>
+                <div id="connection-status">Connected to Claude API</div>
+            </div>
+            <div class="status" id="status">🟢 Ready to chat</div>
+            <div id="messages" class="messages">
+                <!-- Messages will appear here -->
+            </div>
+            <div class="input-area">
+                <div class="input-row">
+                    <input type="text" id="message-input" placeholder="Type your message..." />
+                    <button id="send-btn" onclick="sendMessage()" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiKey = '';
+        let isDemo = false;
+        let isTyping = false;
+
+        function connectAPI() {
+            apiKey = document.getElementById('api-key').value.trim();
+            if (!apiKey) {
+                alert('Please enter your API key');
+                return;
+            }
+            if (!apiKey.startsWith('sk-ant-api03-')) {
+                alert('Please enter a valid Anthropic API key');
+                return;
+            }
+            isDemo = false;
+            showChat();
+        }
+
+        function startDemo() {
+            isDemo = true;
+            showChat();
+        }
+
+        function showChat() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('chat-screen').classList.remove('hidden');
+            
+            const status = document.getElementById('connection-status');
+            if (isDemo) {
+                status.textContent = 'Demo Mode - Offline';
+            } else {
+                status.textContent = 'Connected to Claude API';
+            }
+            
+            addMessage('agent', getWelcomeMessage());
+            document.getElementById('message-input').focus();
+        }
+
+        function getWelcomeMessage() {
+            if (isDemo) {
+                return "Hello! I'm your Autonomous AI Agent in demo mode. How can I help you today?";
+            } else {
+                return "Hello! I'm your Autonomous AI Agent, connected to Claude API. I can now provide you with real Claude AI responses. What would you like to accomplish?";
+            }
+        }
+
+        function addMessage(sender, text) {
+            const messages = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.textContent = text;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function showTyping() {
+            if (isTyping) return;
+            isTyping = true;
+            const messages = document.getElementById('messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'message agent typing';
+            typingDiv.textContent = isDemo ? 'Demo agent thinking...' : 'Claude AI processing...';
+            messages.appendChild(typingDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function hideTyping() {
+            isTyping = false;
+            const typing = document.getElementById('typing-indicator');
+            if (typing) {
+                typing.remove();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+            
+            if (!text || isTyping) return;
+            
+            addMessage('user', text);
+            input.value = '';
+            updateSendButton();
+            
+            showTyping();
+            
+            try {
+                let response;
+                if (isDemo) {
+                    response = await getDemoResponse(text);
+                } else {
+                    response = await getClaudeResponse(text);
+                }
+                
+                hideTyping();
+                addMessage('agent', response);
+                
+            } catch (error) {
+                hideTyping();
+                addMessage('agent', `Error: ${error.message}`);
+            }
+            
+            input.focus();
+        }
+
+        async function getDemoResponse(text) {
+            await new Promise(r => setTimeout(r, 1000 + Math.random() * 1500));
+            return `I understand: "${text}". As your autonomous AI agent, I'm ready to work independently on this with full contextual awareness and strategic planning.`;
+        }
+
+        async function getClaudeResponse(text) {
+            const response = await fetch('/api/anthropic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    apiKey: apiKey,
+                    message: text,
+                    systemPrompt: 'You are an autonomous AI agent designed to bridge the gap between mind and action. Be helpful, clear, and actionable.'
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || `HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.content[0].text;
+        }
+
+        function updateSendButton() {
+            const input = document.getElementById('message-input');
+            const button = document.getElementById('send-btn');
+            button.disabled = !input.value.trim() || isTyping;
+        }
+
+        // Event listeners
+        document.getElementById('message-input').addEventListener('input', updateSendButton);
+        document.getElementById('message-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.getElementById('api-key').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                connectAPI();
+            }
+        });
+
+        // Clear messages with Ctrl+K
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                if (confirm('Clear all messages?')) {
+                    document.getElementById('messages').innerHTML = '';
+                    addMessage('agent', getWelcomeMessage());
+                }
+            }
+        });
+    </script>
+</body>
+</html>

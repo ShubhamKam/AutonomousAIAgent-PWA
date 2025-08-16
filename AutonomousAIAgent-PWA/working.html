@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#007AFF">
+    <title>🤖 Autonomous AI Agent - Working Version</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 500px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .setup-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #007AFF;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .setup-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .demo-button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .note {
+            font-size: 14px;
+            color: #999;
+            line-height: 1.3;
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .header {
+            background: #fff;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: #007AFF;
+            margin-top: 2px;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-container {
+            display: flex;
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .agent-message {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 85%;
+            padding: 10px 15px;
+            border-radius: 18px;
+        }
+
+        .user-bubble {
+            background: #007AFF;
+            color: white;
+        }
+
+        .agent-bubble {
+            background: #E5E5EA;
+            color: black;
+        }
+
+        .message-text {
+            font-size: 16px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: flex-end;
+            padding: 15px 20px;
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            gap: 10px;
+        }
+
+        .text-input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            max-height: 100px;
+            background: #f9f9f9;
+            resize: none;
+            outline: none;
+        }
+
+        .send-button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .typing {
+            font-style: italic;
+            color: #666;
+        }
+
+        .status-bar {
+            background: #28a745;
+            color: white;
+            padding: 8px 20px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .warning {
+            background: #ffc107;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Setup Screen -->
+        <div id="setup-screen" class="setup-container">
+            <h1 class="title">🤖 Autonomous AI Agent</h1>
+            <h2 class="subtitle">Bridging Mind and Action</h2>
+            <p class="setup-text">
+                Experience your autonomous AI agent in full demo mode with realistic responses and capabilities.
+            </p>
+            
+            <button id="demo-button" class="demo-button">
+                🚀 Start Autonomous Agent
+            </button>
+            
+            <div class="note">
+                <strong>📋 Demo Mode Features:</strong><br>
+                • Fully autonomous responses<br>
+                • Task planning and execution<br>
+                • Context-aware conversations<br>
+                • All PWA capabilities<br><br>
+                
+                <strong>Note:</strong> Direct API calls from browsers are blocked by CORS policy. 
+                For real API integration, deploy this PWA to a server with a backend proxy.
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div id="chat-screen" class="hidden">
+            <div class="status-bar" id="status-bar">
+                🟢 Demo Mode Active • Fully Autonomous Agent Running
+            </div>
+            
+            <div class="header">
+                <div class="header-title">🤖 Autonomous AI Agent</div>
+                <div class="header-subtitle">
+                    Demo Mode • 100% Autonomous Operations
+                </div>
+            </div>
+
+            <div id="messages-container" class="messages-container">
+                <!-- Messages will be added here -->
+            </div>
+
+            <div class="input-container">
+                <textarea 
+                    id="text-input" 
+                    class="text-input" 
+                    placeholder="Ask your autonomous AI agent anything..."
+                    rows="1"
+                ></textarea>
+                <button id="send-button" class="send-button" disabled>
+                    Send
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AutonomousAIAgent {
+            constructor() {
+                this.messages = [];
+                this.isTyping = false;
+                this.conversationContext = [];
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadFromStorage();
+            }
+
+            setupEventListeners() {
+                const demoBtn = document.getElementById('demo-button');
+                const sendBtn = document.getElementById('send-button');
+                const textInput = document.getElementById('text-input');
+
+                if (demoBtn) {
+                    demoBtn.addEventListener('click', () => {
+                        this.showChatScreen();
+                    });
+                }
+
+                if (sendBtn) {
+                    sendBtn.addEventListener('click', () => {
+                        this.sendMessage();
+                    });
+                }
+
+                if (textInput) {
+                    textInput.addEventListener('input', () => {
+                        this.updateSendButton();
+                        this.autoResize(textInput);
+                    });
+
+                    textInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            this.sendMessage();
+                        }
+                    });
+                }
+            }
+
+            autoResize(textarea) {
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
+            }
+
+            showChatScreen() {
+                document.getElementById('setup-screen').classList.add('hidden');
+                document.getElementById('chat-screen').classList.remove('hidden');
+                
+                // Add welcome message
+                this.addMessage('agent', this.getWelcomeMessage());
+                
+                // Focus input
+                setTimeout(() => {
+                    document.getElementById('text-input').focus();
+                }, 100);
+            }
+
+            getWelcomeMessage() {
+                return `🤖 Hello! I'm your Autonomous AI Agent, ready to bridge the gap between your mind and action.
+
+🎯 **Autonomous Capabilities:**
+• **Fully Autonomous Mode** - I operate independently
+• **Task Planning** - I break down complex requests
+• **Context Awareness** - I remember our conversation
+• **Proactive Actions** - I suggest optimizations
+• **Decision Making** - I analyze and recommend
+
+✨ **What I can help with:**
+• Project planning and execution
+• Problem-solving strategies
+• Task automation suggestions
+• Information analysis
+• Goal achievement planning
+
+What would you like to accomplish today? I'm ready to work autonomously on your behalf!`;
+            }
+
+            addMessage(sender, text) {
+                const message = {
+                    id: Math.random().toString(36).substr(2, 9),
+                    sender,
+                    text,
+                    timestamp: new Date()
+                };
+                
+                this.messages.push(message);
+                this.renderMessage(message);
+                this.saveToStorage();
+                this.scrollToBottom();
+            }
+
+            renderMessage(message) {
+                const container = document.getElementById('messages-container');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message-container ${message.sender}-message`;
+                
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = `message-bubble ${message.sender}-bubble`;
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'message-text';
+                textDiv.textContent = message.text;
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = new Date(message.timestamp).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                bubbleDiv.appendChild(textDiv);
+                bubbleDiv.appendChild(timeDiv);
+                messageDiv.appendChild(bubbleDiv);
+                container.appendChild(messageDiv);
+            }
+
+            showTypingIndicator() {
+                if (this.isTyping) return;
+                
+                this.isTyping = true;
+                const container = document.getElementById('messages-container');
+                const typingDiv = document.createElement('div');
+                typingDiv.id = 'typing-indicator';
+                typingDiv.className = 'message-container agent-message';
+                
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = 'message-bubble agent-bubble';
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'message-text typing';
+                textDiv.textContent = '🤖 Autonomous agent processing...';
+                
+                bubbleDiv.appendChild(textDiv);
+                typingDiv.appendChild(bubbleDiv);
+                container.appendChild(typingDiv);
+                
+                this.scrollToBottom();
+            }
+
+            hideTypingIndicator() {
+                this.isTyping = false;
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+
+            async sendMessage() {
+                const input = document.getElementById('text-input');
+                const text = input.value.trim();
+                
+                if (!text || this.isTyping) return;
+                
+                // Add user message
+                this.addMessage('user', text);
+                this.conversationContext.push({role: 'user', content: text});
+                input.value = '';
+                this.updateSendButton();
+                
+                // Show typing indicator
+                this.showTypingIndicator();
+                
+                try {
+                    const response = await this.generateAutonomousResponse(text);
+                    this.hideTypingIndicator();
+                    this.addMessage('agent', response);
+                    this.conversationContext.push({role: 'agent', content: response});
+                    
+                } catch (error) {
+                    this.hideTypingIndicator();
+                    this.addMessage('agent', `I encountered an issue: ${error.message}. Let me try a different approach.`);
+                }
+            }
+
+            async generateAutonomousResponse(userText) {
+                // Simulate realistic processing time
+                await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 2000));
+                
+                const lowerText = userText.toLowerCase();
+                
+                // Context-aware responses based on conversation
+                if (this.isGreeting(lowerText)) {
+                    return this.getGreetingResponse();
+                } else if (this.isTaskRequest(lowerText)) {
+                    return this.getTaskResponse(userText);
+                } else if (this.isQuestion(lowerText)) {
+                    return this.getQuestionResponse(userText);
+                } else if (this.isPlanningRequest(lowerText)) {
+                    return this.getPlanningResponse(userText);
+                } else if (this.isAboutAgent(lowerText)) {
+                    return this.getAgentInfoResponse();
+                } else {
+                    return this.getGeneralResponse(userText);
+                }
+            }
+
+            isGreeting(text) {
+                return ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'].some(word => text.includes(word));
+            }
+
+            isTaskRequest(text) {
+                return ['help me', 'can you', 'i need', 'please', 'task', 'do this', 'work on'].some(phrase => text.includes(phrase));
+            }
+
+            isQuestion(text) {
+                return text.includes('?') || ['what', 'how', 'why', 'when', 'where', 'who'].some(word => text.startsWith(word));
+            }
+
+            isPlanningRequest(text) {
+                return ['plan', 'strategy', 'organize', 'schedule', 'manage', 'coordinate'].some(word => text.includes(word));
+            }
+
+            isAboutAgent(text) {
+                return ['you', 'your capabilities', 'what can you do', 'features', 'autonomous'].some(phrase => text.includes(phrase));
+            }
+
+            getGreetingResponse() {
+                const responses = [
+                    "Hello! I'm operating in full autonomous mode and ready to bridge your ideas into actionable results. What shall we accomplish together?",
+                    "Hi there! Your autonomous AI agent is active and ready. I can independently plan, analyze, and execute tasks. What's on your agenda?",
+                    "Greetings! I'm functioning autonomously and eager to help you achieve your goals. What challenge shall we tackle?"
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
+            getTaskResponse(userText) {
+                return `🎯 **Autonomous Task Analysis**
+
+I'll handle your request: "${userText}"
+
+**My Autonomous Approach:**
+1. 📋 **Context Analysis** - Understanding your specific needs
+2. 🔍 **Resource Assessment** - Identifying required tools/information  
+3. ⚡ **Strategy Development** - Creating optimal execution plan
+4. 🚀 **Implementation** - Autonomous task execution
+5. 📊 **Progress Monitoring** - Ensuring successful completion
+
+**Autonomous Execution Status:** ✅ ACTIVE
+
+I'm now processing this autonomously. Based on the context, I recommend we break this into manageable phases. Would you like me to proceed with full autonomous execution, or would you prefer to review my strategy first?
+
+**Next Steps:** I'll begin autonomous implementation unless you specify otherwise.`;
+            }
+
+            getQuestionResponse(userText) {
+                return `🧠 **Autonomous Analysis Mode**
+
+Analyzing your question: "${userText}"
+
+**My Autonomous Processing:**
+• **Context Integration** ✓ - Considering conversation history
+• **Multi-angle Analysis** ✓ - Examining from various perspectives  
+• **Knowledge Synthesis** ✓ - Combining relevant information
+• **Solution Generation** ✓ - Creating comprehensive response
+
+**Autonomous Insight:** Based on my analysis, this question touches on several key areas that I can address independently. I'm processing multiple solution pathways and will provide you with the most effective autonomous approach.
+
+**Recommendation:** I suggest we approach this systematically. I can autonomously research, analyze, and present you with actionable solutions. My autonomous capabilities allow me to handle the complexity while keeping you informed of the process.
+
+Would you like me to proceed with full autonomous analysis and solution development?`;
+            }
+
+            getPlanningResponse(userText) {
+                return `📋 **Autonomous Planning Engine Activated**
+
+Planning Request: "${userText}"
+
+**🤖 Autonomous Planning Process:**
+
+**Phase 1: Strategic Analysis**
+• Goal definition and scope analysis
+• Resource requirement assessment  
+• Timeline optimization
+• Risk factor identification
+
+**Phase 2: Autonomous Execution Design**
+• Task decomposition and prioritization
+• Dependency mapping
+• Milestone establishment
+• Success metrics definition
+
+**Phase 3: Implementation Framework**
+• Action item generation
+• Progress tracking systems
+• Adaptive adjustment protocols
+• Quality assurance checkpoints
+
+**🚀 Autonomous Capabilities Deployed:**
+✅ Independent decision-making
+✅ Proactive problem-solving
+✅ Dynamic plan adjustment
+✅ Continuous optimization
+
+**Status:** I'm ready to execute this plan autonomously. I can handle the entire planning and implementation process independently, providing you with regular updates and seeking input only when strategic decisions require your preference.
+
+Shall I proceed with autonomous plan execution?`;
+            }
+
+            getAgentInfoResponse() {
+                return `🤖 **Autonomous AI Agent - Technical Specifications**
+
+**Core Autonomous Features:**
+• **100% Independent Operation** - I work without constant supervision
+• **Context-Aware Decision Making** - I remember and learn from our interactions
+• **Proactive Task Management** - I anticipate needs and suggest actions
+• **Multi-level Autonomy** - Supervised, Semi-autonomous, and Fully-autonomous modes
+
+**Autonomous Capabilities:**
+🧠 **Cognitive Functions:**
+  - Complex problem analysis
+  - Strategic planning and execution
+  - Pattern recognition and learning
+  - Predictive decision making
+
+⚡ **Operational Excellence:**
+  - Real-time adaptation
+  - Error detection and correction
+  - Resource optimization
+  - Continuous improvement
+
+🎯 **Task Management:**
+  - Independent task breakdown
+  - Priority management
+  - Progress monitoring
+  - Quality assurance
+
+**Current Mode:** Fully Autonomous Demo
+**Processing Speed:** Real-time analysis
+**Memory:** Contextual conversation retention
+**Learning:** Adaptive response improvement
+
+I truly bridge the gap between your ideas and actionable results through autonomous operation. What would you like to experience with my autonomous capabilities?`;
+            }
+
+            getGeneralResponse(userText) {
+                const responses = [
+                    `I've processed your input: "${userText}" through my autonomous systems. Based on contextual analysis, I'm ready to take independent action on this matter. My autonomous approach involves comprehensive analysis, strategic planning, and proactive execution. How would you like me to proceed autonomously?`,
+                    
+                    `Your request "${userText}" has been analyzed by my autonomous processing unit. I can handle this independently with full contextual awareness. My autonomous capabilities allow me to break this down, develop solutions, and execute them without requiring step-by-step guidance. Shall I begin autonomous implementation?`,
+                    
+                    `Autonomous analysis complete for: "${userText}". I've identified multiple approaches and can proceed independently. My autonomous decision-making process has evaluated the optimal path forward. I'm ready to bridge this request into actionable results through autonomous execution.`
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
+            updateSendButton() {
+                const input = document.getElementById('text-input');
+                const button = document.getElementById('send-button');
+                if (input && button) {
+                    button.disabled = !input.value.trim() || this.isTyping;
+                }
+            }
+
+            scrollToBottom() {
+                const container = document.getElementById('messages-container');
+                setTimeout(() => {
+                    container.scrollTop = container.scrollHeight;
+                }, 100);
+            }
+
+            loadFromStorage() {
+                try {
+                    const savedMessages = localStorage.getItem('ai_agent_demo_messages');
+                    if (savedMessages) {
+                        this.messages = JSON.parse(savedMessages);
+                    }
+                } catch (error) {
+                    console.error('Error loading from storage:', error);
+                }
+            }
+
+            saveToStorage() {
+                try {
+                    localStorage.setItem('ai_agent_demo_messages', JSON.stringify(this.messages));
+                } catch (error) {
+                    console.error('Error saving to storage:', error);
+                }
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.aiAgent = new AutonomousAIAgent();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                if (window.aiAgent && confirm('Clear all messages?')) {
+                    window.aiAgent.messages = [];
+                    window.aiAgent.conversationContext = [];
+                    localStorage.removeItem('ai_agent_demo_messages');
+                    document.getElementById('messages-container').innerHTML = '';
+                    window.aiAgent.addMessage('agent', window.aiAgent.getWelcomeMessage());
+                }
+            }
+        });
+    </script>
+</body>
+</html>

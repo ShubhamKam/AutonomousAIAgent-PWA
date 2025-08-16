@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🤖 Autonomous AI Agent - Complete</title>
+    
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .header {
+            background: #007AFF;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .setup {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .setup input {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .setup button {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #007AFF;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #007AFF;
+        }
+
+        .status {
+            padding: 8px 20px;
+            background: #28a745;
+            color: white;
+            text-align: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 0;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .user {
+            background: #007AFF;
+            color: white;
+            margin-left: auto;
+        }
+
+        .agent {
+            background: #f0f0f0;
+            color: black;
+        }
+
+        .typing {
+            font-style: italic;
+            color: #666;
+        }
+
+        .input-area {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-row input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            background: #f9f9f9;
+        }
+
+        .input-row button {
+            padding: 12px 20px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .input-row button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .saved-indicator {
+            font-size: 10px;
+            color: #28a745;
+            margin-top: 5px;
+        }
+
+        /* Chat History Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: left 0.3s ease;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            background: #007AFF;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .chat-item {
+            padding: 12px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .chat-item:hover {
+            background: #f8f9fa;
+        }
+
+        .chat-item.active {
+            background: #e3f2fd;
+            border-color: #007AFF;
+        }
+
+        .chat-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .chat-preview {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.3;
+        }
+
+        .chat-date {
+            color: #999;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1500;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .new-chat-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 280px;
+            }
+            
+            .header h1 {
+                font-size: 16px;
+            }
+            
+            .header-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+        }
+
+        /* iOS Safari fixes */
+        @supports (-webkit-touch-callout: none) {
+            .container {
+                height: -webkit-fill-available;
+            }
+            
+            body {
+                height: -webkit-fill-available;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay -->
+    <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
+    
+    <!-- Chat History Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>Chat History</h3>
+            <button class="header-btn" onclick="closeSidebar()">✕</button>
+        </div>
+        <div class="sidebar-content">
+            <button class="new-chat-btn" onclick="startNewChat()">+ New Chat</button>
+            <div id="chat-list">
+                <!-- Chat history items will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Setup Screen -->
+        <div id="setup-screen">
+            <div class="header">
+                <div></div>
+                <h1>🤖 Autonomous AI Agent</h1>
+                <div></div>
+            </div>
+            <div class="setup">
+                <p>Enter your Anthropic API key:</p>
+                <input type="password" id="api-key" placeholder="sk-ant-api03-..." />
+                <div id="saved-key" class="saved-indicator hidden">✓ API key saved</div>
+                <br>
+                <button class="btn-primary" onclick="connectAPI()">Connect to Claude API</button>
+                <button class="btn-secondary" onclick="startDemo()">Use Demo Mode</button>
+                <p style="font-size: 12px; color: #666; margin-top: 20px;">
+                    Get your API key from console.anthropic.com<br>
+                    All conversations are automatically saved
+                </p>
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div id="chat-screen" class="hidden">
+            <div class="header">
+                <button class="header-btn" onclick="openSidebar()">📚 History</button>
+                <div>
+                    <h1>🤖 AI Agent</h1>
+                    <div id="connection-status" style="font-size: 12px;">Connected</div>
+                </div>
+                <button class="header-btn" onclick="startNewChat()">+ New</button>
+            </div>
+            <div class="status" id="status">🟢 Ready to chat</div>
+            <div id="messages" class="messages">
+                <!-- Messages will appear here -->
+            </div>
+            <div class="input-area">
+                <div class="input-row">
+                    <input type="text" id="message-input" placeholder="Type your message..." />
+                    <button id="send-btn" onclick="sendMessage()" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiKey = '';
+        let isDemo = false;
+        let isTyping = false;
+        let currentChatId = null;
+        let chatHistory = {};
+
+        // Load saved data on page load
+        window.addEventListener('load', () => {
+            loadSavedData();
+        });
+
+        function loadSavedData() {
+            try {
+                // Load API key
+                const savedApiKey = localStorage.getItem('ai_agent_api_key');
+                if (savedApiKey) {
+                    document.getElementById('api-key').value = savedApiKey;
+                    document.getElementById('saved-key').classList.remove('hidden');
+                }
+
+                // Load chat history
+                const savedHistory = localStorage.getItem('ai_agent_chat_history');
+                if (savedHistory) {
+                    chatHistory = JSON.parse(savedHistory);
+                }
+
+                // Load current chat ID
+                const savedChatId = localStorage.getItem('ai_agent_current_chat');
+                if (savedChatId && chatHistory[savedChatId]) {
+                    currentChatId = savedChatId;
+                }
+
+                // Load mode
+                const savedMode = localStorage.getItem('ai_agent_mode');
+                if (savedMode) {
+                    isDemo = savedMode === 'demo';
+                }
+            } catch (error) {
+                console.log('No saved data found');
+            }
+        }
+
+        function saveData() {
+            try {
+                if (apiKey) {
+                    localStorage.setItem('ai_agent_api_key', apiKey);
+                }
+                localStorage.setItem('ai_agent_chat_history', JSON.stringify(chatHistory));
+                localStorage.setItem('ai_agent_current_chat', currentChatId);
+                localStorage.setItem('ai_agent_mode', isDemo ? 'demo' : 'api');
+            } catch (error) {
+                console.error('Failed to save data:', error);
+            }
+        }
+
+        function generateChatId() {
+            return 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function createNewChat() {
+            currentChatId = generateChatId();
+            chatHistory[currentChatId] = {
+                id: currentChatId,
+                title: 'New Conversation',
+                messages: [],
+                created: new Date().toISOString(),
+                updated: new Date().toISOString(),
+                mode: isDemo ? 'demo' : 'api'
+            };
+            saveData();
+            return currentChatId;
+        }
+
+        function updateChatTitle(chatId, firstMessage) {
+            if (chatHistory[chatId]) {
+                // Create title from first user message (max 30 chars)
+                const title = firstMessage.length > 30 ? 
+                    firstMessage.substring(0, 30) + '...' : 
+                    firstMessage;
+                chatHistory[chatId].title = title;
+                chatHistory[chatId].updated = new Date().toISOString();
+                saveData();
+                updateChatList();
+            }
+        }
+
+        function addMessageToChat(chatId, sender, text) {
+            if (!chatHistory[chatId]) {
+                console.error('Chat not found:', chatId);
+                return;
+            }
+
+            const message = {
+                sender,
+                text,
+                timestamp: new Date().toISOString()
+            };
+
+            chatHistory[chatId].messages.push(message);
+            chatHistory[chatId].updated = new Date().toISOString();
+
+            // Update title if this is the first user message
+            if (sender === 'user' && chatHistory[chatId].messages.filter(m => m.sender === 'user').length === 1) {
+                updateChatTitle(chatId, text);
+            }
+
+            saveData();
+        }
+
+        function connectAPI() {
+            const inputKey = document.getElementById('api-key').value.trim();
+            if (!inputKey) {
+                alert('Please enter your API key');
+                return;
+            }
+            if (!inputKey.startsWith('sk-ant-api03-')) {
+                alert('Please enter a valid Anthropic API key');
+                return;
+            }
+            apiKey = inputKey;
+            isDemo = false;
+            showChat();
+        }
+
+        function startDemo() {
+            isDemo = true;
+            apiKey = '';
+            showChat();
+        }
+
+        function showChat() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('chat-screen').classList.remove('hidden');
+            
+            const status = document.getElementById('connection-status');
+            const statusBar = document.getElementById('status');
+            
+            if (isDemo) {
+                status.textContent = 'Demo Mode';
+                statusBar.textContent = '📱 Demo Mode Active';
+                statusBar.style.background = '#17a2b8';
+            } else {
+                status.textContent = 'Claude API';
+                statusBar.textContent = '🟢 Connected to Claude API';
+                statusBar.style.background = '#28a745';
+            }
+
+            // Load or create current chat
+            if (!currentChatId || !chatHistory[currentChatId]) {
+                createNewChat();
+                addMessageToChat(currentChatId, 'agent', getWelcomeMessage());
+            }
+
+            loadCurrentChat();
+            updateChatList();
+            
+            setTimeout(() => {
+                document.getElementById('message-input').focus();
+            }, 100);
+        }
+
+        function loadCurrentChat() {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.innerHTML = '';
+            
+            if (currentChatId && chatHistory[currentChatId]) {
+                chatHistory[currentChatId].messages.forEach(msg => {
+                    renderMessage(msg.sender, msg.text);
+                });
+            }
+            
+            scrollToBottom();
+        }
+
+        function getWelcomeMessage() {
+            if (isDemo) {
+                return "Hello! I'm your Autonomous AI Agent in demo mode. All conversations are automatically saved and can be accessed from the History menu. How can I help you today?";
+            } else {
+                return "Hello! I'm your Autonomous AI Agent, connected to Claude API. Your conversations are automatically saved and you can continue them anytime from the History menu. What would you like to accomplish?";
+            }
+        }
+
+        function renderMessage(sender, text) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.textContent = text;
+            messagesContainer.appendChild(messageDiv);
+        }
+
+        function addMessage(sender, text) {
+            renderMessage(sender, text);
+            addMessageToChat(currentChatId, sender, text);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('messages');
+            setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 50);
+        }
+
+        function showTyping() {
+            if (isTyping) return;
+            isTyping = true;
+            const messagesContainer = document.getElementById('messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'message agent typing';
+            typingDiv.textContent = isDemo ? '🤖 Demo agent thinking...' : '🤖 Claude AI processing...';
+            messagesContainer.appendChild(typingDiv);
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            isTyping = false;
+            const typing = document.getElementById('typing-indicator');
+            if (typing) {
+                typing.remove();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+            
+            if (!text || isTyping) return;
+            
+            addMessage('user', text);
+            input.value = '';
+            updateSendButton();
+            
+            showTyping();
+            
+            try {
+                let response;
+                if (isDemo) {
+                    response = await getDemoResponse(text);
+                } else {
+                    response = await getClaudeResponse(text);
+                }
+                
+                hideTyping();
+                addMessage('agent', response);
+                
+            } catch (error) {
+                hideTyping();
+                addMessage('agent', `Error: ${error.message}`);
+                console.error('Chat error:', error);
+            }
+            
+            setTimeout(() => {
+                input.focus();
+            }, 100);
+        }
+
+        async function getDemoResponse(text) {
+            await new Promise(r => setTimeout(r, 1000 + Math.random() * 1500));
+            
+            const responses = [
+                `I understand your request: "${text}". As your autonomous AI agent, I'm analyzing this and preparing a comprehensive approach with full contextual awareness.`,
+                `Processing: "${text}". My autonomous systems are engaged to provide you with strategic insights and actionable solutions.`,
+                `Analyzing: "${text}". I'm working independently to bridge your ideas into concrete, actionable results through autonomous operation.`
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        async function getClaudeResponse(text) {
+            const response = await fetch('/api/anthropic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    apiKey: apiKey,
+                    message: text,
+                    systemPrompt: 'You are an autonomous AI agent designed to bridge the gap between mind and action. You have 100% autonomous capabilities. Be helpful, clear, actionable, and demonstrate autonomous thinking in your responses.'
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || `HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.content[0].text;
+        }
+
+        function updateSendButton() {
+            const input = document.getElementById('message-input');
+            const button = document.getElementById('send-btn');
+            button.disabled = !input.value.trim() || isTyping;
+        }
+
+        // Chat History Functions
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay').classList.add('active');
+            updateChatList();
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        function updateChatList() {
+            const chatList = document.getElementById('chat-list');
+            chatList.innerHTML = '';
+
+            const sortedChats = Object.values(chatHistory)
+                .sort((a, b) => new Date(b.updated) - new Date(a.updated));
+
+            sortedChats.forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.className = `chat-item ${chat.id === currentChatId ? 'active' : ''}`;
+                
+                const preview = chat.messages.length > 1 ? 
+                    chat.messages[chat.messages.length - 1].text.substring(0, 50) + '...' :
+                    'New conversation';
+
+                chatItem.innerHTML = `
+                    <div class="chat-title">${chat.title}</div>
+                    <div class="chat-preview">${preview}</div>
+                    <div class="chat-date">
+                        ${new Date(chat.updated).toLocaleDateString()} 
+                        ${new Date(chat.updated).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteChat('${chat.id}')">🗑️</button>
+                    </div>
+                `;
+                
+                chatItem.onclick = () => loadChat(chat.id);
+                chatList.appendChild(chatItem);
+            });
+        }
+
+        function loadChat(chatId) {
+            if (chatHistory[chatId]) {
+                currentChatId = chatId;
+                loadCurrentChat();
+                closeSidebar();
+                saveData();
+            }
+        }
+
+        function startNewChat() {
+            createNewChat();
+            addMessageToChat(currentChatId, 'agent', getWelcomeMessage());
+            loadCurrentChat();
+            closeSidebar();
+            updateChatList();
+        }
+
+        function deleteChat(chatId) {
+            if (confirm('Delete this conversation?')) {
+                delete chatHistory[chatId];
+                
+                if (currentChatId === chatId) {
+                    // Switch to most recent chat or create new one
+                    const remainingChats = Object.values(chatHistory)
+                        .sort((a, b) => new Date(b.updated) - new Date(a.updated));
+                    
+                    if (remainingChats.length > 0) {
+                        currentChatId = remainingChats[0].id;
+                        loadCurrentChat();
+                    } else {
+                        startNewChat();
+                    }
+                }
+                
+                saveData();
+                updateChatList();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('message-input').addEventListener('input', updateSendButton);
+        document.getElementById('message-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.getElementById('api-key').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                connectAPI();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                startNewChat();
+            }
+            
+            if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+                e.preventDefault();
+                openSidebar();
+            }
+        });
+
+        // Save data when leaving page
+        window.addEventListener('beforeunload', saveData);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                saveData();
+            }
+        });
+    </script>
+</body>
+</html>

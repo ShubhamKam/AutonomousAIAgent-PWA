@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🤖 Autonomous AI Agent - Tools Integration</title>
+    
+    <!-- Bloomberg-inspired Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Bloomberg Color Palette */
+            --bloomberg-black: #0d0d0d;
+            --bloomberg-dark: #1a1a1a;
+            --bloomberg-surface: #2d2d2d;
+            --bloomberg-border: #404040;
+            --bloomberg-orange: #ff6600;
+            --bloomberg-blue: #1e90ff;
+            --bloomberg-green: #00ff88;
+            --bloomberg-red: #ff3366;
+            --bloomberg-yellow: #ffcc00;
+            --bloomberg-white: #ffffff;
+            --bloomberg-gray: #9d9d9d;
+            
+            /* Typography */
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.5);
+            
+            /* Transitions */
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--bloomberg-black);
+            color: var(--bloomberg-white);
+            height: 100vh;
+            overflow: hidden;
+            font-weight: 400;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--bloomberg-dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--bloomberg-border);
+            border-right: 1px solid var(--bloomberg-border);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--bloomberg-dark), var(--bloomberg-surface));
+            padding: 16px 24px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--bloomberg-border);
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .header-btn {
+            background: var(--bloomberg-surface);
+            border: 1px solid var(--bloomberg-border);
+            color: var(--bloomberg-white);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            transition: var(--transition);
+            text-transform: uppercase;
+        }
+
+        .header-btn:hover {
+            background: var(--bloomberg-orange);
+            border-color: var(--bloomberg-orange);
+        }
+
+        .status {
+            padding: 12px 24px;
+            background: var(--bloomberg-green);
+            color: var(--bloomberg-black);
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .tools-panel {
+            width: 300px;
+            background: var(--bloomberg-surface);
+            border-right: 1px solid var(--bloomberg-border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tools-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--bloomberg-border);
+            background: var(--bloomberg-dark);
+        }
+
+        .tools-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tools-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .tool-item {
+            background: var(--bloomberg-dark);
+            border: 1px solid var(--bloomberg-border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tool-item:hover {
+            border-color: var(--bloomberg-orange);
+            transform: translateY(-1px);
+        }
+
+        .tool-item.authenticated {
+            border-color: var(--bloomberg-green);
+        }
+
+        .tool-item.selected {
+            border-color: var(--bloomberg-orange);
+            background: rgba(255, 102, 0, 0.1);
+        }
+
+        .tool-name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .tool-description {
+            font-size: 11px;
+            color: var(--bloomberg-gray);
+            margin-bottom: 8px;
+        }
+
+        .tool-status {
+            font-size: 10px;
+            font-family: var(--font-mono);
+            padding: 2px 6px;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        .tool-status.authenticated {
+            background: var(--bloomberg-green);
+            color: var(--bloomberg-black);
+        }
+
+        .tool-status.not-authenticated {
+            background: var(--bloomberg-red);
+            color: var(--bloomberg-white);
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: var(--bloomberg-black);
+        }
+
+        .message {
+            margin: 16px 0;
+            padding: 16px 20px;
+            border-radius: 12px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.6;
+            font-size: 14px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, var(--bloomberg-orange), #e55a00);
+            color: var(--bloomberg-white);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.agent {
+            background: var(--bloomberg-surface);
+            color: var(--bloomberg-white);
+            border: 1px solid var(--bloomberg-border);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.system {
+            background: var(--bloomberg-blue);
+            color: var(--bloomberg-white);
+            text-align: center;
+            margin: 8px auto;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            max-width: 100%;
+        }
+
+        .tool-output {
+            background: var(--bloomberg-dark);
+            border: 1px solid var(--bloomberg-green);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 8px 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        .tool-output pre {
+            white-space: pre-wrap;
+            color: var(--bloomberg-green);
+        }
+
+        .input-area {
+            padding: 20px;
+            background: var(--bloomberg-dark);
+            border-top: 1px solid var(--bloomberg-border);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-row input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 1px solid var(--bloomberg-border);
+            border-radius: 24px;
+            font-size: 14px;
+            background: var(--bloomberg-surface);
+            color: var(--bloomberg-white);
+            font-family: var(--font-primary);
+            transition: var(--transition);
+        }
+
+        .input-row input:focus {
+            outline: none;
+            border-color: var(--bloomberg-orange);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+        }
+
+        .input-row button {
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--bloomberg-orange), #e55a00);
+            color: var(--bloomberg-white);
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition);
+            text-transform: uppercase;
+        }
+
+        .input-row button:disabled {
+            background: var(--bloomberg-border);
+            cursor: not-allowed;
+        }
+
+        /* Tool Authentication Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--bloomberg-dark);
+            border: 1px solid var(--bloomberg-border);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            color: var(--bloomberg-gray);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--bloomberg-border);
+            border-radius: 6px;
+            background: var(--bloomberg-surface);
+            color: var(--bloomberg-white);
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--bloomberg-orange);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: var(--bloomberg-orange);
+            color: var(--bloomberg-white);
+        }
+
+        .btn-secondary {
+            background: var(--bloomberg-surface);
+            color: var(--bloomberg-white);
+            border: 1px solid var(--bloomberg-border);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .typing {
+            font-style: italic;
+            color: var(--bloomberg-gray);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .tools-panel {
+                width: 100%;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Tool Authentication Modal -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header" id="modal-title">AUTHENTICATE TOOL</div>
+            <div id="auth-form">
+                <!-- Authentication form will be populated here -->
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeAuthModal()">CANCEL</button>
+                <button class="btn btn-primary" onclick="authenticateTool()">CONNECT</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI AGENT • TOOLS INTEGRATION</h1>
+            <button class="header-btn" onclick="showToolsHelp()">HELP</button>
+        </div>
+
+        <div class="status" id="status">
+            TOOLS INTEGRATION ACTIVE • CONNECT EXTERNAL SERVICES
+        </div>
+
+        <div class="main-content">
+            <div class="tools-panel">
+                <div class="tools-header">
+                    <h3>Available Tools</h3>
+                </div>
+                <div class="tools-list" id="tools-list">
+                    <!-- Tools will be populated here -->
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div id="messages" class="messages">
+                    <!-- Messages will appear here -->
+                </div>
+                <div class="input-area">
+                    <div class="input-row">
+                        <input type="text" id="message-input" placeholder="Use tools with natural language: 'Create JIRA issue for bug fix'" />
+                        <button id="send-btn" onclick="sendMessage()" disabled>SEND</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="tools-integration.js"></script>
+    <script>
+        let toolsManager;
+        let apiKey = '';
+        let isDemo = false;
+        let isTyping = false;
+        let selectedTool = null;
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            toolsManager = new ToolsManager();
+            toolsManager.loadSavedCredentials();
+            
+            loadApiSettings();
+            populateToolsList();
+            addSystemMessage('TOOLS INTEGRATION SYSTEM ONLINE\n\nAvailable tools: JIRA, Google Drive, Slack, GitHub, and more.\nAuthenticate tools to enable autonomous operations.');
+        }
+
+        function loadApiSettings() {
+            try {
+                const savedApiKey = localStorage.getItem('ai_agent_api_key');
+                const savedMode = localStorage.getItem('ai_agent_mode');
+                
+                if (savedApiKey) {
+                    apiKey = savedApiKey;
+                    isDemo = false;
+                } else {
+                    isDemo = true;
+                }
+            } catch (error) {
+                isDemo = true;
+            }
+        }
+
+        function populateToolsList() {
+            const toolsList = document.getElementById('tools-list');
+            const tools = toolsManager.getAvailableTools();
+            
+            toolsList.innerHTML = '';
+            
+            tools.forEach(tool => {
+                const toolElement = document.createElement('div');
+                toolElement.className = `tool-item ${tool.authenticated ? 'authenticated' : ''}`;
+                toolElement.onclick = () => selectTool(tool.name);
+                
+                toolElement.innerHTML = `
+                    <div class="tool-name">${tool.name}</div>
+                    <div class="tool-description">${tool.description}</div>
+                    <div class="tool-status ${tool.authenticated ? 'authenticated' : 'not-authenticated'}">
+                        ${tool.authenticated ? '✓ CONNECTED' : '○ NOT CONNECTED'}
+                    </div>
+                `;
+                
+                toolsList.appendChild(toolElement);
+            });
+        }
+
+        function selectTool(toolName) {
+            selectedTool = toolName;
+            
+            // Update UI to show selected tool
+            document.querySelectorAll('.tool-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            const toolElements = document.querySelectorAll('.tool-item');
+            const tools = toolsManager.getAvailableTools();
+            const toolIndex = tools.findIndex(t => t.name === toolName);
+            
+            if (toolIndex >= 0 && toolElements[toolIndex]) {
+                toolElements[toolIndex].classList.add('selected');
+            }
+            
+            const tool = tools.find(t => t.name === toolName);
+            if (tool && !tool.authenticated) {
+                showAuthModal(toolName);
+            }
+        }
+
+        function showAuthModal(toolName) {
+            const modal = document.getElementById('auth-modal');
+            const title = document.getElementById('modal-title');
+            const form = document.getElementById('auth-form');
+            
+            title.textContent = `AUTHENTICATE ${toolName.toUpperCase()}`;
+            
+            // Create authentication form based on tool
+            form.innerHTML = getAuthForm(toolName);
+            
+            modal.classList.remove('hidden');
+        }
+
+        function getAuthForm(toolName) {
+            switch (toolName) {
+                case 'jira':
+                    return `
+                        <div class="form-group">
+                            <label>JIRA Domain</label>
+                            <input type="text" id="jira-domain" placeholder="your-company" />
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="jira-email" placeholder="user@company.com" />
+                        </div>
+                        <div class="form-group">
+                            <label>API Token</label>
+                            <input type="password" id="jira-token" placeholder="API token from JIRA" />
+                        </div>
+                    `;
+                case 'googledrive':
+                    return `
+                        <div class="form-group">
+                            <label>Google Access Token</label>
+                            <input type="password" id="drive-token" placeholder="OAuth2 access token" />
+                        </div>
+                    `;
+                case 'slack':
+                    return `
+                        <div class="form-group">
+                            <label>Bot Token</label>
+                            <input type="password" id="slack-token" placeholder="xoxb-..." />
+                        </div>
+                    `;
+                case 'github':
+                    return `
+                        <div class="form-group">
+                            <label>Personal Access Token</label>
+                            <input type="password" id="github-token" placeholder="GitHub PAT" />
+                        </div>
+                    `;
+                default:
+                    return '<p>Authentication form not available for this tool.</p>';
+            }
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        async function authenticateTool() {
+            if (!selectedTool) return;
+            
+            let credentials = {};
+            
+            try {
+                switch (selectedTool) {
+                    case 'jira':
+                        credentials = {
+                            domain: document.getElementById('jira-domain').value,
+                            email: document.getElementById('jira-email').value,
+                            apiToken: document.getElementById('jira-token').value
+                        };
+                        break;
+                    case 'googledrive':
+                        credentials = {
+                            accessToken: document.getElementById('drive-token').value
+                        };
+                        break;
+                    case 'slack':
+                        credentials = {
+                            botToken: document.getElementById('slack-token').value
+                        };
+                        break;
+                    case 'github':
+                        credentials = {
+                            token: document.getElementById('github-token').value
+                        };
+                        break;
+                }
+                
+                const result = await toolsManager.authenticateTool(selectedTool, credentials);
+                
+                if (result.success) {
+                    addSystemMessage(`${selectedTool.toUpperCase()} AUTHENTICATION SUCCESSFUL`);
+                    closeAuthModal();
+                    populateToolsList();
+                } else {
+                    alert(`Authentication failed: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Authentication error: ${error.message}`);
+            }
+        }
+
+        function addMessage(sender, text, isToolOutput = false) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            
+            if (isToolOutput) {
+                messageDiv.className = 'tool-output';
+                messageDiv.innerHTML = `<pre>${text}</pre>`;
+            } else {
+                messageDiv.className = `message ${sender}`;
+                messageDiv.textContent = text;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function addSystemMessage(text) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message system';
+            messageDiv.textContent = text;
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('messages');
+            setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 50);
+        }
+
+        function showTyping() {
+            if (isTyping) return;
+            isTyping = true;
+            const messagesContainer = document.getElementById('messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'message agent typing';
+            typingDiv.textContent = '🤖 PROCESSING WITH TOOLS...';
+            messagesContainer.appendChild(typingDiv);
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            isTyping = false;
+            const typing = document.getElementById('typing-indicator');
+            if (typing) {
+                typing.remove();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+            
+            if (!text || isTyping) return;
+            
+            addMessage('user', text);
+            input.value = '';
+            updateSendButton();
+            
+            showTyping();
+            
+            try {
+                // Parse the message to see if it involves tool usage
+                const toolAction = parseToolAction(text);
+                
+                let response;
+                if (toolAction) {
+                    response = await executeToolAction(toolAction, text);
+                } else {
+                    response = await getRegularResponse(text);
+                }
+                
+                hideTyping();
+                addMessage('agent', response);
+                
+            } catch (error) {
+                hideTyping();
+                addMessage('agent', `ERROR: ${error.message}`);
+                console.error('Error:', error);
+            }
+            
+            setTimeout(() => {
+                input.focus();
+            }, 100);
+        }
+
+        function parseToolAction(text) {
+            const lowerText = text.toLowerCase();
+            
+            // JIRA actions
+            if (lowerText.includes('jira') || lowerText.includes('issue') || lowerText.includes('ticket')) {
+                if (lowerText.includes('create') || lowerText.includes('new')) {
+                    return { tool: 'jira', action: 'create_issue', text };
+                }
+                if (lowerText.includes('search') || lowerText.includes('find')) {
+                    return { tool: 'jira', action: 'search_issues', text };
+                }
+            }
+            
+            // Google Drive actions
+            if (lowerText.includes('drive') || lowerText.includes('file') || lowerText.includes('folder')) {
+                if (lowerText.includes('create') || lowerText.includes('new')) {
+                    return { tool: 'googledrive', action: 'create_folder', text };
+                }
+                if (lowerText.includes('list') || lowerText.includes('show')) {
+                    return { tool: 'googledrive', action: 'list_files', text };
+                }
+            }
+            
+            // Slack actions
+            if (lowerText.includes('slack') || lowerText.includes('message') || lowerText.includes('send')) {
+                return { tool: 'slack', action: 'send_message', text };
+            }
+            
+            // GitHub actions
+            if (lowerText.includes('github') || lowerText.includes('repository') || lowerText.includes('repo')) {
+                if (lowerText.includes('create') || lowerText.includes('new')) {
+                    return { tool: 'github', action: 'create_issue', text };
+                }
+                if (lowerText.includes('list') || lowerText.includes('show')) {
+                    return { tool: 'github', action: 'get_repositories', text };
+                }
+            }
+            
+            return null;
+        }
+
+        async function executeToolAction(toolAction, originalText) {
+            const { tool, action, text } = toolAction;
+            
+            // Check if tool is authenticated
+            const tools = toolsManager.getAvailableTools();
+            const toolInfo = tools.find(t => t.name === tool);
+            
+            if (!toolInfo || !toolInfo.authenticated) {
+                return `${tool.toUpperCase()} TOOL NOT AUTHENTICATED\n\nPlease authenticate the ${tool} tool first by clicking on it in the tools panel.`;
+            }
+            
+            try {
+                // Parse parameters from natural language (simplified)
+                const params = parseActionParameters(action, text);
+                
+                addSystemMessage(`EXECUTING ${tool.toUpperCase()} ACTION: ${action.toUpperCase()}`);
+                
+                const result = await toolsManager.executeTool(tool, action, params);
+                
+                if (result.success) {
+                    const formattedResult = formatToolResult(tool, action, result);
+                    addMessage('agent', formattedResult, true);
+                    return `${tool.toUpperCase()} ACTION COMPLETED SUCCESSFULLY`;
+                } else {
+                    return `${tool.toUpperCase()} ACTION FAILED: ${result.error}`;
+                }
+                
+            } catch (error) {
+                return `${tool.toUpperCase()} EXECUTION ERROR: ${error.message}`;
+            }
+        }
+
+        function parseActionParameters(action, text) {
+            // Simplified parameter extraction from natural language
+            // In a real implementation, you'd use NLP or more sophisticated parsing
+            
+            const params = {};
+            
+            switch (action) {
+                case 'create_issue':
+                    params.projectKey = 'TEST'; // Default, should be configurable
+                    params.summary = text.replace(/create|jira|issue|ticket|new/gi, '').trim();
+                    params.description = `Created via Autonomous AI Agent: ${text}`;
+                    params.issueType = 'Task';
+                    break;
+                    
+                case 'search_issues':
+                    params.projectKey = 'TEST';
+                    params.maxResults = 10;
+                    break;
+                    
+                case 'list_files':
+                    params.pageSize = 20;
+                    break;
+                    
+                case 'create_folder':
+                    params.name = text.replace(/create|folder|new|drive/gi, '').trim() || 'New Folder';
+                    break;
+                    
+                case 'send_message':
+                    params.channel = '#general'; // Default channel
+                    params.text = text.replace(/slack|send|message/gi, '').trim();
+                    break;
+                    
+                case 'get_repositories':
+                    // No additional params needed
+                    break;
+            }
+            
+            return params;
+        }
+
+        function formatToolResult(tool, action, result) {
+            let output = '';
+            
+            switch (tool) {
+                case 'jira':
+                    if (action === 'create_issue' && result.issue) {
+                        output = `JIRA ISSUE CREATED
+Key: ${result.issue.key}
+URL: ${result.issue.url}`;
+                    } else if (action === 'search_issues' && result.issues) {
+                        output = `JIRA ISSUES FOUND (${result.issues.length}):
+${result.issues.map(issue => `• ${issue.key}: ${issue.summary} [${issue.status}]`).join('\n')}`;
+                    }
+                    break;
+                    
+                case 'googledrive':
+                    if (action === 'list_files' && result.files) {
+                        output = `GOOGLE DRIVE FILES (${result.files.length}):
+${result.files.map(file => `• ${file.name} (${file.type})`).join('\n')}`;
+                    } else if (action === 'create_folder' && result.folder) {
+                        output = `FOLDER CREATED
+Name: ${result.folder.name}
+URL: ${result.folder.url}`;
+                    }
+                    break;
+                    
+                case 'slack':
+                    if (action === 'send_message') {
+                        output = 'SLACK MESSAGE SENT SUCCESSFULLY';
+                    }
+                    break;
+                    
+                case 'github':
+                    if (action === 'get_repositories' && result.repositories) {
+                        output = `GITHUB REPOSITORIES (${result.repositories.length}):
+${result.repositories.slice(0, 10).map(repo => `• ${repo.name} (${repo.language || 'N/A'}) - ${repo.stars} stars`).join('\n')}`;
+                    }
+                    break;
+            }
+            
+            return output || JSON.stringify(result, null, 2);
+        }
+
+        async function getRegularResponse(text) {
+            if (isDemo) {
+                await new Promise(r => setTimeout(r, 1000));
+                return `AUTONOMOUS AI ANALYSIS: "${text}"\n\nI can help you integrate with external tools. Try commands like:\n• "Create JIRA issue for bug fix"\n• "List Google Drive files"\n• "Send Slack message to team"\n• "Show GitHub repositories"\n\nAuthenticate tools first to enable these capabilities.`;
+            } else {
+                // Call Claude API with tools context
+                const response = await fetch('/api/anthropic', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        apiKey: apiKey,
+                        message: text,
+                        systemPrompt: `You are an autonomous AI agent with access to external tools like JIRA, Google Drive, Slack, and GitHub. Help users understand how to use these tools and suggest tool-based solutions. Available tools: ${toolsManager.getAvailableTools().map(t => t.name).join(', ')}.`
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.content[0].text;
+                } else {
+                    throw new Error('API request failed');
+                }
+            }
+        }
+
+        function updateSendButton() {
+            const input = document.getElementById('message-input');
+            const button = document.getElementById('send-btn');
+            button.disabled = !input.value.trim() || isTyping;
+        }
+
+        function showToolsHelp() {
+            addSystemMessage(`TOOLS INTEGRATION HELP
+
+AVAILABLE COMMANDS:
+• "Create JIRA issue for [description]"
+• "Search JIRA issues in project"
+• "List Google Drive files"
+• "Create folder named [name]"
+• "Send Slack message [text]"
+• "Show GitHub repositories"
+
+AUTHENTICATION REQUIRED:
+Click on each tool to authenticate before use.
+
+NATURAL LANGUAGE SUPPORT:
+The AI agent understands natural language commands and automatically maps them to tool actions.`);
+        }
+
+        // Event listeners
+        document.getElementById('message-input').addEventListener('input', updateSendButton);
+        document.getElementById('message-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAuthModal();
+            }
+        });
+    </script>
+</body>
+</html>

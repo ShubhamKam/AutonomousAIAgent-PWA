@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#007AFF">
+    <title>🤖 Autonomous AI Agent - API Version</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 500px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .setup-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #007AFF;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .api-key-input {
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 12px 15px;
+            font-size: 16px;
+            background: #f9f9f9;
+            margin-bottom: 20px;
+        }
+
+        .setup-button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .demo-button {
+            background: #f0f0f0;
+            color: #007AFF;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .header {
+            background: #fff;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: #007AFF;
+            margin-top: 2px;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-container {
+            display: flex;
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .agent-message {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 85%;
+            padding: 10px 15px;
+            border-radius: 18px;
+        }
+
+        .user-bubble {
+            background: #007AFF;
+            color: white;
+        }
+
+        .agent-bubble {
+            background: #E5E5EA;
+            color: black;
+        }
+
+        .message-text {
+            font-size: 16px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: flex-end;
+            padding: 15px 20px;
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            gap: 10px;
+        }
+
+        .text-input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            max-height: 100px;
+            background: #f9f9f9;
+            resize: none;
+            outline: none;
+        }
+
+        .send-button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .typing {
+            font-style: italic;
+            color: #666;
+        }
+
+        .status-bar {
+            background: #28a745;
+            color: white;
+            padding: 8px 20px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .error {
+            background: #dc3545;
+        }
+
+        .note {
+            font-size: 12px;
+            color: #999;
+            line-height: 1.3;
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Setup Screen -->
+        <div id="setup-screen" class="setup-container">
+            <h1 class="title">🤖 Autonomous AI Agent</h1>
+            <h2 class="subtitle">Real API Integration</h2>
+            <p style="margin-bottom: 20px; color: #666;">
+                Connect to Claude API through our proxy server:
+            </p>
+            <input 
+                type="password" 
+                id="api-key-input" 
+                class="api-key-input" 
+                placeholder="sk-ant-api03-..."
+                autocomplete="off"
+            >
+            <button id="activate-button" class="setup-button">
+                🔗 Connect to Claude API
+            </button>
+            <button id="demo-button" class="demo-button">
+                📱 Use Offline Demo
+            </button>
+            <div class="note">
+                Get your API key from console.anthropic.com<br>
+                API calls go through local proxy to avoid CORS
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div id="chat-screen" class="hidden">
+            <div class="status-bar" id="status-bar">
+                🟢 Connected to Claude API via Proxy
+            </div>
+            
+            <div class="header">
+                <div class="header-title">🤖 Autonomous AI Agent</div>
+                <div id="header-subtitle" class="header-subtitle">
+                    Connected to Claude API • Fully Autonomous
+                </div>
+            </div>
+
+            <div id="messages-container" class="messages-container">
+                <!-- Messages will be added here -->
+            </div>
+
+            <div class="input-container">
+                <textarea 
+                    id="text-input" 
+                    class="text-input" 
+                    placeholder="Chat with Claude via your autonomous agent..."
+                    rows="1"
+                ></textarea>
+                <button id="send-button" class="send-button" disabled>
+                    Send
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class APIEnabledAIAgent {
+            constructor() {
+                this.messages = [];
+                this.apiKey = '';
+                this.isDemo = false;
+                this.isTyping = false;
+                this.proxyURL = window.location.origin; // Same server as the page
+                
+                this.setupEventListeners();
+                this.loadFromStorage();
+                this.checkProxyHealth();
+            }
+
+            async checkProxyHealth() {
+                try {
+                    const response = await fetch(`${this.proxyURL}/health`);
+                    if (response.ok) {
+                        console.log('Proxy server is running');
+                    }
+                } catch (error) {
+                    console.warn('Proxy server not detected, API calls may fail');
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('activate-button').onclick = () => this.activateAPI();
+                document.getElementById('demo-button').onclick = () => this.startDemo();
+                document.getElementById('send-button').onclick = () => this.sendMessage();
+                
+                const textInput = document.getElementById('text-input');
+                const apiKeyInput = document.getElementById('api-key-input');
+                
+                textInput.oninput = () => this.updateSendButton();
+                textInput.onkeydown = (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                };
+
+                apiKeyInput.onkeydown = (e) => {
+                    if (e.key === 'Enter') {
+                        this.activateAPI();
+                    }
+                };
+            }
+
+            activateAPI() {
+                const apiKey = document.getElementById('api-key-input').value.trim();
+                if (!apiKey) {
+                    alert('Please enter your Anthropic API key');
+                    return;
+                }
+                if (!apiKey.startsWith('sk-ant-api03-')) {
+                    alert('Please enter a valid Anthropic API key (starts with sk-ant-api03-)');
+                    return;
+                }
+
+                this.apiKey = apiKey;
+                this.isDemo = false;
+                this.showChatScreen();
+            }
+
+            startDemo() {
+                this.isDemo = true;
+                this.showChatScreen();
+            }
+
+            showChatScreen() {
+                document.getElementById('setup-screen').classList.add('hidden');
+                document.getElementById('chat-screen').classList.remove('hidden');
+                
+                const statusBar = document.getElementById('status-bar');
+                const subtitle = document.getElementById('header-subtitle');
+                
+                if (this.isDemo) {
+                    statusBar.textContent = '📱 Offline Demo Mode • No API Required';
+                    statusBar.className = 'status-bar';
+                    subtitle.textContent = 'Demo Mode • Fully Autonomous';
+                } else {
+                    statusBar.textContent = '🟢 Connected to Claude API via Proxy';
+                    statusBar.className = 'status-bar';
+                    subtitle.textContent = 'Connected to Claude API • Fully Autonomous';
+                }
+                
+                this.addMessage('agent', this.getWelcomeMessage());
+                
+                setTimeout(() => {
+                    document.getElementById('text-input').focus();
+                }, 100);
+            }
+
+            getWelcomeMessage() {
+                if (this.isDemo) {
+                    return `🤖 Hello! I'm your Autonomous AI Agent running in demo mode.
+
+✨ Demo Features:
+• Intelligent offline responses
+• Autonomous task planning
+• Context-aware conversations
+• All PWA capabilities
+
+What would you like to explore today?`;
+                } else {
+                    return `🤖 Hello! I'm your Autonomous AI Agent, now connected to Claude API.
+
+🔗 **Live API Connection:**
+• Real Claude AI responses
+• Advanced reasoning capabilities
+• Up-to-date knowledge
+• Truly autonomous operation
+
+I can now provide you with the full power of Claude AI through autonomous operation. What shall we accomplish together?`;
+                }
+            }
+
+            addMessage(sender, text) {
+                const message = {
+                    sender,
+                    text,
+                    timestamp: new Date()
+                };
+                
+                this.messages.push(message);
+                this.renderMessage(message);
+                this.saveToStorage();
+                this.scrollToBottom();
+            }
+
+            renderMessage(message) {
+                const container = document.getElementById('messages-container');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message-container ${message.sender}-message`;
+                
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = `message-bubble ${message.sender}-bubble`;
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'message-text';
+                textDiv.textContent = message.text;
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = new Date(message.timestamp).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                bubbleDiv.appendChild(textDiv);
+                bubbleDiv.appendChild(timeDiv);
+                messageDiv.appendChild(bubbleDiv);
+                container.appendChild(messageDiv);
+            }
+
+            showTypingIndicator() {
+                if (this.isTyping) return;
+                
+                this.isTyping = true;
+                const container = document.getElementById('messages-container');
+                const typingDiv = document.createElement('div');
+                typingDiv.id = 'typing-indicator';
+                typingDiv.className = 'message-container agent-message';
+                
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = 'message-bubble agent-bubble';
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'message-text typing';
+                textDiv.textContent = this.isDemo ? 
+                    '🤖 Demo agent thinking...' : 
+                    '🤖 Claude AI processing via proxy...';
+                
+                bubbleDiv.appendChild(textDiv);
+                typingDiv.appendChild(bubbleDiv);
+                container.appendChild(typingDiv);
+                
+                this.scrollToBottom();
+            }
+
+            hideTypingIndicator() {
+                this.isTyping = false;
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+
+            async sendMessage() {
+                const input = document.getElementById('text-input');
+                const text = input.value.trim();
+                
+                if (!text || this.isTyping) return;
+                
+                this.addMessage('user', text);
+                input.value = '';
+                this.updateSendButton();
+                
+                this.showTypingIndicator();
+                
+                try {
+                    let response;
+                    if (this.isDemo) {
+                        response = await this.generateDemoResponse(text);
+                    } else {
+                        response = await this.callClaudeAPI(text);
+                    }
+                    
+                    this.hideTypingIndicator();
+                    this.addMessage('agent', response);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.hideTypingIndicator();
+                    
+                    let errorMessage = 'I encountered an error processing your request.';
+                    if (error.message.includes('Failed to fetch')) {
+                        errorMessage = 'Unable to connect to the proxy server. Please ensure the Node.js proxy server is running on port 3001.';
+                    } else if (error.message.includes('401')) {
+                        errorMessage = 'Invalid API key. Please check your Anthropic API key.';
+                    } else if (error.message.includes('429')) {
+                        errorMessage = 'Rate limit exceeded. Please wait a moment and try again.';
+                    }
+                    
+                    this.addMessage('agent', errorMessage);
+                    this.updateStatusBar(error.message, true);
+                }
+            }
+
+            async callClaudeAPI(message) {
+                const response = await fetch(`${this.proxyURL}/api/anthropic`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        apiKey: this.apiKey,
+                        message: message,
+                        systemPrompt: `You are an autonomous AI agent designed to bridge the gap between mind and action. You have 100% autonomous capabilities and can:
+
+- Operate with three autonomy levels (supervised, semi-autonomous, fully-autonomous)
+- Plan and execute complex multi-step tasks
+- Maintain context and memory across conversations
+- Proactively suggest and execute actions
+- Learn from interactions and adapt
+
+Respond as an autonomous agent that truly bridges the gap between the user's ideas and actionable results. Be proactive, intelligent, and autonomous in your suggestions.`
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.content[0].text;
+            }
+
+            async generateDemoResponse(userText) {
+                // Simulate delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const responses = [
+                    `I understand your request: "${userText}". As your autonomous AI agent, I'm ready to work independently on this matter with full contextual awareness and strategic planning.`,
+                    `Analyzing: "${userText}". My autonomous systems are now engaged to provide you with comprehensive, actionable solutions through independent operation.`,
+                    `Processing autonomously: "${userText}". I'll handle this end-to-end with my full autonomous capabilities, bridging your ideas into concrete results.`
+                ];
+                
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
+            updateStatusBar(message, isError = false) {
+                const statusBar = document.getElementById('status-bar');
+                statusBar.textContent = message;
+                statusBar.className = isError ? 'status-bar error' : 'status-bar';
+                
+                if (isError) {
+                    setTimeout(() => {
+                        statusBar.textContent = this.isDemo ? 
+                            '📱 Offline Demo Mode • No API Required' : 
+                            '🟢 Connected to Claude API via Proxy';
+                        statusBar.className = 'status-bar';
+                    }, 5000);
+                }
+            }
+
+            updateSendButton() {
+                const input = document.getElementById('text-input');
+                const button = document.getElementById('send-button');
+                button.disabled = !input.value.trim() || this.isTyping;
+            }
+
+            scrollToBottom() {
+                const container = document.getElementById('messages-container');
+                setTimeout(() => {
+                    container.scrollTop = container.scrollHeight;
+                }, 100);
+            }
+
+            loadFromStorage() {
+                try {
+                    const savedApiKey = localStorage.getItem('ai_agent_api_key');
+                    if (savedApiKey) {
+                        document.getElementById('api-key-input').value = savedApiKey;
+                    }
+                } catch (error) {
+                    console.error('Error loading from storage:', error);
+                }
+            }
+
+            saveToStorage() {
+                try {
+                    if (this.apiKey) {
+                        localStorage.setItem('ai_agent_api_key', this.apiKey);
+                    }
+                    localStorage.setItem('ai_agent_messages', JSON.stringify(this.messages));
+                } catch (error) {
+                    console.error('Error saving to storage:', error);
+                }
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new APIEnabledAIAgent();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                if (confirm('Clear all messages?')) {
+                    localStorage.removeItem('ai_agent_messages');
+                    location.reload();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

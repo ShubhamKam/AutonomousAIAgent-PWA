@@ -1,0 +1,16 @@
+{
+  "appId": "com.autonomousai.agent",
+  "appName": "AutonomousAIAgent",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "allowNavigation": [
+      "*"
+    ]
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  }
+}
