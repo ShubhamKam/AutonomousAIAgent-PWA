@@ -110,6 +110,20 @@
             background: var(--status-bar-bg);
         }
 
+        /* Enhanced mobile sidebar positioning */
+        .cordova .sidebar,
+        .mobile-app .sidebar {
+            top: calc(var(--status-bar-height, 0px) + env(safe-area-inset-top, 0));
+            height: calc(100vh - var(--status-bar-height, 0px) - env(safe-area-inset-top, 0));
+            padding-top: 0;
+        }
+
+        .cordova .sidebar-header,
+        .mobile-app .sidebar-header {
+            margin-top: 4px;
+            padding-top: 16px;
+        }
+
         /* Auto-detect mobile app and apply styles */
         @media (display-mode: standalone) {
             body {
@@ -129,11 +143,11 @@
 
         /* Enhanced Header - Critical mobile fix */
         .header {
-            padding: 12px 16px;
+            padding: 16px 20px;
             background: var(--commence-container);
             border-bottom: 1px solid var(--commence-surface);
             flex-shrink: 0;
-            min-height: 56px;
+            min-height: 64px;
             box-sizing: border-box;
             /* CRITICAL: Mobile header stability */
             position: relative;
@@ -141,10 +155,10 @@
             display: flex;
             align-items: center;
             width: 100%;
-            /* Mobile app safe area handling */
-            padding-top: max(12px, env(safe-area-inset-top, 0));
-            padding-left: max(16px, env(safe-area-inset-left, 0));
-            padding-right: max(16px, env(safe-area-inset-right, 0));
+            /* Enhanced mobile app safe area handling */
+            padding-top: max(16px, env(safe-area-inset-top, 8px));
+            padding-left: max(20px, env(safe-area-inset-left, 8px));
+            padding-right: max(20px, env(safe-area-inset-right, 8px));
             /* Prevent header from disappearing */
             transform: translateZ(0);
             -webkit-transform: translateZ(0);
@@ -704,16 +718,18 @@
         /* Sidebar */
         .sidebar {
             position: fixed;
-            top: 0;
+            top: var(--status-bar-height, 0px);
             left: -320px;
             width: 320px;
-            height: 100vh;
+            height: calc(100vh - var(--status-bar-height, 0px));
             background: var(--commence-container);
             border-right: 1px solid var(--commence-surface);
             z-index: 1000;
             transition: left 0.3s ease;
             display: flex;
             flex-direction: column;
+            /* Mobile safe area handling */
+            padding-top: env(safe-area-inset-top, 0);
         }
 
         .sidebar.open {
@@ -721,11 +737,15 @@
         }
 
         .sidebar-header {
-            padding: 16px;
+            padding: 20px 16px 16px 16px;
             border-bottom: 1px solid var(--commence-surface);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            /* Enhanced mobile spacing */
+            margin-top: env(safe-area-inset-top, 8px);
+            min-height: 56px;
+            box-sizing: border-box;
         }
 
         .sidebar-content {
@@ -929,13 +949,17 @@
             }
 
             .header {
-                padding: 12px 16px;
-                min-height: 52px;
-                /* Ensure visibility on all mobile devices */
+                padding: 18px 20px;
+                min-height: 60px;
+                /* Enhanced mobile header positioning */
                 position: sticky;
                 top: 0;
                 background: var(--commence-container);
                 border-bottom: 1px solid var(--commence-surface);
+                /* Better mobile spacing */
+                padding-top: max(18px, env(safe-area-inset-top, 12px));
+                padding-left: max(20px, env(safe-area-inset-left, 12px));
+                padding-right: max(20px, env(safe-area-inset-right, 12px));
             }
 
             .logo {
@@ -968,6 +992,28 @@
                 width: 28px;
                 height: 28px;
                 font-size: 12px;
+            }
+
+            /* Enhanced mobile sidebar positioning */
+            .sidebar {
+                width: 280px;
+                top: max(var(--status-bar-height, 0px), env(safe-area-inset-top, 0));
+                height: calc(100vh - max(var(--status-bar-height, 0px), env(safe-area-inset-top, 0)));
+            }
+
+            .sidebar-header {
+                padding: 16px 12px 12px 12px;
+                margin-top: 0;
+                min-height: 48px;
+            }
+
+            .sidebar-content {
+                padding: 12px;
+            }
+
+            .sidebar-item {
+                padding: 10px;
+                gap: 10px;
             }
 
         }
