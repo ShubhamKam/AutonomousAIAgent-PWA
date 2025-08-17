@@ -101,8 +101,8 @@
             width: 100vw;
             box-shadow: none;
             margin: 0;
-            /* Enhanced safe areas with status bar awareness */
-            padding-top: max(var(--status-bar-height), env(safe-area-inset-top, 0));
+            /* Aggressive safe areas with extra status bar spacing */
+            padding-top: max(calc(var(--status-bar-height) + 16px), calc(env(safe-area-inset-top, 0) + 16px));
             padding-bottom: env(safe-area-inset-bottom, 0);
             padding-left: env(safe-area-inset-left, 0);
             padding-right: env(safe-area-inset-right, 0);
@@ -113,15 +113,15 @@
         /* Enhanced mobile sidebar positioning */
         .cordova .sidebar,
         .mobile-app .sidebar {
-            top: calc(var(--status-bar-height, 0px) + env(safe-area-inset-top, 0));
-            height: calc(100vh - var(--status-bar-height, 0px) - env(safe-area-inset-top, 0));
+            top: calc(var(--status-bar-height, 0px) + env(safe-area-inset-top, 0) + 16px);
+            height: calc(100vh - var(--status-bar-height, 0px) - env(safe-area-inset-top, 0) - 16px);
             padding-top: 0;
         }
 
         .cordova .sidebar-header,
         .mobile-app .sidebar-header {
-            margin-top: 4px;
-            padding-top: 16px;
+            margin-top: 8px;
+            padding-top: 20px;
         }
 
         /* Auto-detect mobile app and apply styles */
@@ -143,11 +143,11 @@
 
         /* Enhanced Header - Critical mobile fix */
         .header {
-            padding: 16px 20px;
+            padding: 24px 20px;
             background: var(--commence-container);
             border-bottom: 1px solid var(--commence-surface);
             flex-shrink: 0;
-            min-height: 64px;
+            min-height: 72px;
             box-sizing: border-box;
             /* CRITICAL: Mobile header stability */
             position: relative;
@@ -155,10 +155,10 @@
             display: flex;
             align-items: center;
             width: 100%;
-            /* Enhanced mobile app safe area handling */
-            padding-top: max(16px, env(safe-area-inset-top, 8px));
-            padding-left: max(20px, env(safe-area-inset-left, 8px));
-            padding-right: max(20px, env(safe-area-inset-right, 8px));
+            /* Aggressive mobile app safe area handling */
+            padding-top: max(24px, env(safe-area-inset-top, 16px));
+            padding-left: max(20px, env(safe-area-inset-left, 12px));
+            padding-right: max(20px, env(safe-area-inset-right, 12px));
             /* Prevent header from disappearing */
             transform: translateZ(0);
             -webkit-transform: translateZ(0);
@@ -949,15 +949,15 @@
             }
 
             .header {
-                padding: 18px 20px;
-                min-height: 60px;
-                /* Enhanced mobile header positioning */
+                padding: 28px 20px;
+                min-height: 76px;
+                /* Aggressive mobile header positioning */
                 position: sticky;
                 top: 0;
                 background: var(--commence-container);
                 border-bottom: 1px solid var(--commence-surface);
-                /* Better mobile spacing */
-                padding-top: max(18px, env(safe-area-inset-top, 12px));
+                /* Aggressive mobile spacing */
+                padding-top: max(28px, calc(env(safe-area-inset-top, 0) + 20px));
                 padding-left: max(20px, env(safe-area-inset-left, 12px));
                 padding-right: max(20px, env(safe-area-inset-right, 12px));
             }
@@ -994,17 +994,17 @@
                 font-size: 12px;
             }
 
-            /* Enhanced mobile sidebar positioning */
+            /* Aggressive mobile sidebar positioning */
             .sidebar {
                 width: 280px;
-                top: max(var(--status-bar-height, 0px), env(safe-area-inset-top, 0));
-                height: calc(100vh - max(var(--status-bar-height, 0px), env(safe-area-inset-top, 0)));
+                top: max(calc(var(--status-bar-height, 0px) + 20px), calc(env(safe-area-inset-top, 0) + 20px));
+                height: calc(100vh - max(calc(var(--status-bar-height, 0px) + 20px), calc(env(safe-area-inset-top, 0) + 20px)));
             }
 
             .sidebar-header {
-                padding: 16px 12px 12px 12px;
-                margin-top: 0;
-                min-height: 48px;
+                padding: 20px 12px 16px 12px;
+                margin-top: 4px;
+                min-height: 56px;
             }
 
             .sidebar-content {
