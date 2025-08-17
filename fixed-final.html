@@ -14,6 +14,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
+    <!-- Markdown Parser for Enhanced Text Formatting -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
     <style>
         :root {
             /* Commence Color Palette */
@@ -393,6 +396,135 @@
             background: var(--commence-card);
             color: var(--commence-white);
             border: 1px solid var(--commence-surface);
+        }
+
+        /* Enhanced Markdown Formatting for Messages */
+        .message h1, .message h2, .message h3, .message h4, .message h5, .message h6 {
+            color: var(--commence-primary-light);
+            font-weight: 600;
+            margin: 12px 0 8px 0;
+            line-height: 1.3;
+        }
+
+        .message h1 { font-size: 18px; }
+        .message h2 { font-size: 16px; }
+        .message h3 { font-size: 15px; }
+        .message h4, .message h5, .message h6 { font-size: 14px; }
+
+        .message p {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .message ul, .message ol {
+            margin: 8px 0 8px 16px;
+            padding-left: 12px;
+        }
+
+        .message li {
+            margin: 4px 0;
+            line-height: 1.5;
+        }
+
+        .message ul li {
+            list-style: none;
+            position: relative;
+        }
+
+        .message ul li::before {
+            content: '•';
+            color: var(--commence-accent);
+            font-size: 16px;
+            position: absolute;
+            left: -16px;
+            top: 0;
+        }
+
+        .message ol li {
+            list-style: decimal;
+            color: var(--commence-white);
+        }
+
+        .message blockquote {
+            border-left: 3px solid var(--commence-primary);
+            padding-left: 12px;
+            margin: 12px 0;
+            font-style: italic;
+            color: var(--commence-gray);
+        }
+
+        .message code {
+            background: var(--commence-surface);
+            color: var(--commence-primary-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .message pre {
+            background: var(--commence-surface);
+            border: 1px solid var(--commence-gray-dark);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .message pre code {
+            background: none;
+            padding: 0;
+            color: var(--commence-white);
+        }
+
+        .message strong, .message b {
+            font-weight: 600;
+            color: var(--commence-white);
+        }
+
+        .message em, .message i {
+            font-style: italic;
+            color: var(--commence-gray-light);
+        }
+
+        .message a {
+            color: var(--commence-primary-light);
+            text-decoration: none;
+            border-bottom: 1px solid var(--commence-primary-light);
+        }
+
+        .message a:hover {
+            color: var(--commence-primary);
+            border-bottom-color: var(--commence-primary);
+        }
+
+        .message hr {
+            border: none;
+            height: 1px;
+            background: var(--commence-surface);
+            margin: 16px 0;
+        }
+
+        .message table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 13px;
+        }
+
+        .message th, .message td {
+            border: 1px solid var(--commence-surface);
+            padding: 8px;
+            text-align: left;
+        }
+
+        .message th {
+            background: var(--commence-surface);
+            font-weight: 600;
+            color: var(--commence-white);
         }
 
         .typing-indicator {
@@ -1942,7 +2074,25 @@
             const messagesContainer = document.getElementById('messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}`;
-            messageDiv.textContent = text;
+            
+            // Enhanced formatting with markdown parsing
+            if (typeof marked !== 'undefined' && type === 'agent') {
+                // Configure marked for better formatting
+                marked.setOptions({
+                    breaks: true,        // Convert line breaks to <br>
+                    gfm: true,          // GitHub flavored markdown
+                    sanitize: false,    // Allow HTML (be careful in production)
+                    smartLists: true,   // Better list formatting
+                    smartypants: true   // Smart quotes and dashes
+                });
+                
+                // Parse markdown and set HTML
+                messageDiv.innerHTML = marked.parse(text);
+            } else {
+                // Fallback to plain text for user messages or if marked is not available
+                messageDiv.textContent = text;
+            }
+            
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
@@ -1959,7 +2109,38 @@
         async function getDemoResponse(text) {
             await new Promise(r => setTimeout(r, 1000 + Math.random() * 1000));
             
-            return `⚡ **Commence AI Response**\n\nYour message: "${text}"\n\nI'm running in demo mode with the beautiful Commence workspace interface! \n\n**Available in full version:**\n• Real Claude AI responses\n• Project management\n• Task tracking\n• Tools integration\n• Advanced conversation handling\n\nConnect your API key to unlock full functionality! ✨`;
+            return `# ⚡ Commence AI Response
+
+**Your message:** "${text}"
+
+I'm running in demo mode with the beautiful Commence workspace interface! 
+
+## 📱 Enhanced Text Formatting
+Now featuring **markdown support** for better readability:
+
+### Available Features:
+- **Real Claude AI responses** with full API integration
+- **Project management** with file storage
+- **Task tracking** and completion
+- **Tools integration** (JIRA, Google Drive, Slack, GitHub)
+- **Advanced conversation handling** with markdown formatting
+
+### Formatting Examples:
+1. **Bold text** and *italic text*
+2. \`Inline code\` with syntax highlighting
+3. Lists with proper indentation
+4. Headers and subheaders
+5. > Blockquotes for important notes
+
+---
+
+**Ready to get started?** Connect your API key to unlock full functionality! ✨
+
+\`\`\`javascript
+// Code blocks are also supported!
+const commence = new AIWorkspace();
+commence.initialize();
+\`\`\``;
         }
 
         async function getClaudeResponse(text) {
@@ -2034,7 +2215,39 @@
                 if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
                     console.warn('📱 Direct API call failed, using demo mode');
                     await new Promise(r => setTimeout(r, 1000 + Math.random() * 1000));
-                    return `⚡ **Commence (Mobile Mode)**\n\nYour message: "${text}"\n\nI'm running with the beautiful Commence workspace interface! The app automatically detects mobile environment and adapts accordingly.\n\n**🔄 Next APK Build Will Include:**\n• Native HTTP requests via Cordova plugin\n• Full Claude API functionality\n• Authentication system\n• Project & task management\n• Zero CORS restrictions\n\n**Current Capabilities:**\n• Professional Commence interface ✅\n• User authentication ✅\n• Navigation system (Chats, Projects, Tasks, Tools) ✅\n• Mobile-optimized design ✅\n• Enhanced header stability ✅\n• Secure storage integration ✅\n\nReady to provide full AI assistance once the updated APK is installed! 🎯`;
+                    return `# ⚡ Commence (Mobile Mode)
+
+**Your message:** "${text}"
+
+I'm running with the beautiful Commence workspace interface! The app automatically detects mobile environment and adapts accordingly.
+
+## 🔄 Next APK Build Will Include:
+- **Native HTTP requests** via Cordova plugin
+- **Full Claude API functionality** with zero restrictions
+- **Complete authentication system** 
+- **Project & task management** with file storage
+- **Zero CORS restrictions** for seamless API calls
+
+## ✅ Current Capabilities:
+1. **Professional Commence interface** with enhanced formatting
+2. **User authentication** (Login/Register/Demo)
+3. **Navigation system** (Chats, Projects, Tasks, Tools)
+4. **Mobile-optimized design** with perfect positioning
+5. **Enhanced header stability** and status bar integration
+6. **Markdown text formatting** for better readability
+7. **Secure storage integration** for data persistence
+
+---
+
+> **Ready to provide full AI assistance** once the updated APK is installed! 🎯
+
+### Test the new formatting:
+\`\`\`bash
+# Try asking questions like:
+# "Create a project plan"
+# "List best practices"  
+# "Format a report"
+\`\`\``;
                 } else {
                     throw error;
                 }
