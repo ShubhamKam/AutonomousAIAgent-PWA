@@ -289,11 +289,17 @@
             flex-direction: column;
             padding: 20px;
             min-height: 0;
-            overflow-y: auto;
+            overflow: hidden;
         }
 
         .tab-content.active {
             display: flex;
+        }
+
+        /* Special layout for chats section */
+        #chats-section {
+            padding: 0;
+            overflow: hidden;
         }
 
         /* Section Headers */
@@ -338,6 +344,10 @@
             padding: 12px 20px;
             border-bottom: 1px solid var(--commence-surface);
             background: var(--commence-container);
+            /* Keep header fixed */
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
         }
 
         .chat-title {
@@ -366,6 +376,16 @@
             color: var(--commence-white);
         }
 
+        /* Chat Content Container */
+        .chat-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            max-height: 100%;
+            overflow: hidden;
+        }
+
         .messages {
             flex: 1;
             overflow-y: auto;
@@ -373,6 +393,11 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            /* Critical: Prevent content overflow */
+            min-height: 0;
+            max-height: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: var(--commence-surface) transparent;
         }
 
         .message {
@@ -382,6 +407,11 @@
             font-size: 14px;
             line-height: 1.5;
             animation: fadeIn 0.3s ease;
+            /* Critical: Prevent message overflow */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            overflow: hidden;
+            box-sizing: border-box;
         }
 
         .message.user {
@@ -404,6 +434,9 @@
             font-weight: 600;
             margin: 12px 0 8px 0;
             line-height: 1.3;
+            /* Prevent header overflow */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .message h1 { font-size: 18px; }
@@ -472,6 +505,11 @@
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 13px;
             line-height: 1.4;
+            /* Critical: Prevent code block overflow */
+            max-width: 100%;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .message pre code {
@@ -567,6 +605,11 @@
             padding: 20px;
             background: var(--commence-container);
             border-top: 1px solid var(--commence-surface);
+            /* Critical: Keep input always visible */
+            flex-shrink: 0;
+            position: relative;
+            z-index: 100;
+            box-sizing: border-box;
         }
 
         .input-wrapper {
@@ -1308,8 +1351,8 @@
                         </div>
                     </div>
                     
-                    <div id="chat-conversation" class="chat-content" style="flex: 1; display: flex; flex-direction: column;">
-                        <div class="messages" id="messages" style="flex: 1; overflow-y: auto;"></div>
+                    <div id="chat-conversation" class="chat-content">
+                        <div class="messages" id="messages"></div>
                         <div class="typing-indicator" id="typing">
                             <div class="typing-dots">
                                 <div class="typing-dot"></div>
