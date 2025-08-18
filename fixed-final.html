@@ -281,25 +281,53 @@
             display: flex;
             flex-direction: column;
             min-height: 0;
+            overflow: hidden;
         }
 
         .tab-content {
             display: none;
             flex: 1;
             flex-direction: column;
-            padding: 20px;
             min-height: 0;
             overflow: hidden;
+        }
+
+        /* Add padding only to non-chat sections */
+        .tab-content:not(#chats-section) {
+            padding: 20px;
+            overflow-y: auto;
         }
 
         .tab-content.active {
             display: flex;
         }
 
-        /* Special layout for chats section */
+        /* Special layout for chats section - CRITICAL FOR SCROLLING */
         #chats-section {
             padding: 0;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        #chats-section .chat-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        #chats-section .messages {
+            flex: 1;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            min-height: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
         /* Section Headers */
@@ -386,18 +414,23 @@
             overflow: hidden;
         }
 
+        /* Default messages container - overridden by #chats-section .messages */
         .messages {
-            flex: 1;
-            overflow-y: auto;
-            padding-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            /* Critical: Prevent content overflow */
-            min-height: 0;
-            max-height: 100%;
             scrollbar-width: thin;
             scrollbar-color: var(--commence-surface) transparent;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: var(--commence-surface);
+            border-radius: 3px;
         }
 
         .message {
@@ -1343,7 +1376,7 @@
             <div class="content">
                 <!-- Chats Section -->
                 <div id="chats-section" class="tab-content active">
-                    <div class="chat-header" style="margin: -20px -20px 20px -20px;">
+                    <div class="chat-header">
                         <div class="chat-title">General Chat</div>
                         <div class="chat-tabs">
                             <button class="chat-tab active" onclick="switchChatTab('conversation')">Chat</button>
@@ -1717,6 +1750,31 @@
         
         // Make debug function globally available for testing
         window.debugStatusBar = debugStatusBar;
+
+        // 🔧 Chat Scrolling Debug Function
+        function debugChatScrolling() {
+            const messages = document.getElementById('messages');
+            const chatsSection = document.getElementById('chats-section');
+            const content = document.querySelector('.content');
+            
+            console.log('🔍 Chat Scrolling Debug Info:');
+            console.log('Messages element:', messages);
+            console.log('Messages scrollHeight:', messages?.scrollHeight);
+            console.log('Messages clientHeight:', messages?.clientHeight);
+            console.log('Messages scrollTop:', messages?.scrollTop);
+            console.log('Messages overflow-y:', getComputedStyle(messages)?.overflowY);
+            console.log('Chats section height:', getComputedStyle(chatsSection)?.height);
+            console.log('Content height:', getComputedStyle(content)?.height);
+            console.log('Messages computed styles:', {
+                display: getComputedStyle(messages)?.display,
+                flex: getComputedStyle(messages)?.flex,
+                minHeight: getComputedStyle(messages)?.minHeight,
+                maxHeight: getComputedStyle(messages)?.maxHeight
+            });
+        }
+        
+        // Make debug function globally available
+        window.debugChatScrolling = debugChatScrolling;
 
         function initializeApp() {
             // Enhanced mobile detection and optimizations
@@ -2137,12 +2195,20 @@
             }
             
             messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Enhanced scrolling - force scroll to bottom
+            setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                messagesContainer.scrollIntoView(false);
+            }, 50);
         }
 
         function showTyping() {
             document.getElementById('typing').style.display = 'flex';
-            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+            const messagesContainer = document.getElementById('messages');
+            setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 50);
         }
 
         function hideTyping() {
