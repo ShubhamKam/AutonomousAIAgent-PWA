@@ -118,15 +118,32 @@ jobs:
       run: |
         cd commence-app
         echo "📱 Adding Android platform..."
-        cordova platform add android
+        
+        # Ensure clean state
+        cordova platform remove android || true
+        
+        # Add Android platform with explicit version
+        cordova platform add android@latest
         
         echo "📁 Checking platforms:"
         cordova platform list
+        
+        echo "📁 Verifying Android platform structure:"
+        ls -la platforms/ || true
+        ls -la platforms/android/ || true
         
     - name: Configure Android settings
       run: |
         cd commence-app
         echo "⚙️ Configuring Android settings for Commence..."
+        
+        # Check if Android platform exists
+        if [ ! -d "platforms/android" ]; then
+          echo "❌ Android platform directory not found!"
+          echo "📁 Available platforms:"
+          ls -la platforms/ || true
+          exit 1
+        fi
         
         # Update config.xml for better mobile experience
         sed -i 's/<name>HelloCordova<\/name>/<name>Commence<\/name>/g' config.xml || true
@@ -135,6 +152,11 @@ jobs:
         # Force APK build instead of AAB
         echo "📱 Configuring to build APK..."
         mkdir -p platforms/android/app/build/outputs/apk/debug/
+        
+        # Ensure gradle.properties files exist before writing
+        mkdir -p platforms/android/app/
+        touch platforms/android/gradle.properties || true
+        touch platforms/android/app/gradle.properties || true
         
         # Add gradle configuration to force APK
         echo "android.bundle.enableUncompressedNativeLibs=false" >> platforms/android/gradle.properties || true
@@ -147,7 +169,18 @@ jobs:
         cd commence-app
         echo "🔨 Building Commence APK..."
         
+        # Verify Android platform before building
+        if [ ! -d "platforms/android" ]; then
+          echo "❌ Android platform missing before build!"
+          cordova platform list
+          exit 1
+        fi
+        
+        echo "📁 Pre-build verification:"
+        ls -la platforms/android/
+        
         # Build debug APK specifically (not AAB)
+        echo "🚀 Starting Cordova build..."
         cordova build android --debug --gradleArg="assembleDebug"
         
         # If debug fails, try different approaches
