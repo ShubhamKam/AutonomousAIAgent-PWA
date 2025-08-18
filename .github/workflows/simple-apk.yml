@@ -51,8 +51,38 @@ jobs:
     - name: Create Cordova project
       run: |
         echo "📱 Creating Commence AI Workspace Cordova project..."
+        
+        # Remove any existing project
+        rm -rf commence-app || true
+        
+        # Create new Cordova project with error checking
         cordova create commence-app com.commence.workspace "Commence"
+        
+        # Verify project creation
+        if [ ! -d "commence-app" ]; then
+          echo "❌ Cordova project creation failed!"
+          echo "📁 Current directory contents:"
+          ls -la
+          exit 1
+        fi
+        
         cd commence-app
+        
+        # Verify project structure
+        echo "📁 Verifying Cordova project structure:"
+        ls -la
+        
+        if [ ! -f "config.xml" ]; then
+          echo "❌ config.xml not found - Cordova project incomplete!"
+          exit 1
+        fi
+        
+        if [ ! -d "www" ]; then
+          echo "❌ www directory not found - Cordova project incomplete!"
+          exit 1
+        fi
+        
+        echo "✅ Cordova project structure verified"
         
         # Copy Commence web files
         echo "📁 Copying Commence web files..."
@@ -130,7 +160,25 @@ jobs:
         
         echo "📁 Verifying Android platform structure:"
         ls -la platforms/ || true
+        
+        if [ ! -d "platforms/android" ]; then
+          echo "❌ Android platform was not added successfully!"
+          echo "📁 Available platforms:"
+          ls -la platforms/ 2>/dev/null || echo "No platforms directory found"
+          echo "🔧 Attempting to force add Android platform..."
+          
+          # Try different approaches to add Android
+          cordova platform add android@latest --verbose || true
+          cordova platform add https://github.com/apache/cordova-android.git --verbose || true
+          
+          if [ ! -d "platforms/android" ]; then
+            echo "❌ All attempts to add Android platform failed!"
+            exit 1
+          fi
+        fi
+        
         ls -la platforms/android/ || true
+        echo "✅ Android platform verified"
         
     - name: Configure Android settings
       run: |
@@ -187,10 +235,18 @@ jobs:
         if [ ! -f "platforms/android/app/build/outputs/apk/debug/app-debug.apk" ]; then
           echo "🔄 Debug APK not found, trying alternative build..."
           
-          # Try building with specific gradle task
-          cd platforms/android
-          ./gradlew assembleDebug || true
-          cd ../..
+          # Ensure we're in the right directory and gradle wrapper exists
+          if [ -f "platforms/android/gradlew" ]; then
+            echo "🔧 Found gradle wrapper, trying direct gradle build..."
+            cd platforms/android
+            chmod +x gradlew
+            ./gradlew assembleDebug || true
+            cd ../..
+          else
+            echo "⚠️ Gradle wrapper not found at platforms/android/gradlew"
+            echo "📁 Platform android contents:"
+            ls -la platforms/android/ || true
+          fi
           
           # Try standard build as fallback
           cordova build android || true
